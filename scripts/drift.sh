@@ -43,7 +43,9 @@ cat "$TMP/ac.txt" "$TMP/sk.txt" > "$TMP/haystack.txt"
 
 miss=0; total=0
 while IFS= read -r line; do
-  case "$line" in ''|\#*) continue ;; esac
+  line=${line%$'\r'}          # 防止 CRLF 检出带来的 \r 导致必然不命中
+  [ -z "$line" ] && continue
+  case "$line" in \#*) continue ;; esac
   label=${line%%|*}
   needle=${line#*|}
   total=$((total+1))

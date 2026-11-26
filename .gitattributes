@@ -1,0 +1,8 @@
+# 统一行尾，避免 Windows 上 checkout 成 CRLF 后脚本判断出错
+# （drift.sh 逐行读清单做精确匹配，行尾带 \r 会全部匹配失败）
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+*.txt  text eol=lf
+VERSION text eol=lf
