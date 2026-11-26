@@ -5,7 +5,7 @@ set -u
 cd "$(dirname "$0")/.." || exit 1
 fail=0
 
-echo "== 1/3 两份 HTML 结构 =="
+echo "== 1/4 两份 HTML 结构 =="
 for f in docs/orca-panorama.html docs/orca-workflow.html; do
   python - "$f" <<'PY'
 import re,sys
@@ -23,7 +23,7 @@ PY
   [ $? -ne 0 ] && fail=1
 done
 
-echo "== 2/3 QUIZ 数量自洽 =="
+echo "== 2/4 QUIZ 数量自洽 =="
 python - <<'PY'
 import re,sys
 s=open('docs/QUIZ.md',encoding='utf-8').read()
@@ -39,12 +39,25 @@ sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
 
-echo "== 3/3 文档里不该有 Markdown 星号（HTML 会原样显示） =="
+echo "== 3/4 文档里不该有 Markdown 星号（HTML 会原样显示） =="
 if grep -n '\*\*[^*<]\{1,25\}\*\*' docs/*.html >/dev/null 2>&1; then
   echo "  HTML 里有 ** 残留 -> 失败"; fail=1
 else
   echo "  OK"
 fi
+
+echo "== 4/4 版本一致性（VERSION 与 CHANGELOG 首节） =="
+python - <<'PY'
+import re,sys
+v=open('VERSION',encoding='utf-8').read().strip()
+s=open('CHANGELOG.md',encoding='utf-8').read()
+m=re.search(r'^##\s*v(\d+\.\d+\.\d+)',s,re.M)
+top=m.group(1) if m else None
+ok = bool(re.fullmatch(r'\d+\.\d+\.\d+',v)) and v==top
+print(f"  VERSION={v!r} CHANGELOG首节={top!r} -> {'OK' if ok else '不一致（改版本时要同时改两处）'}")
+sys.exit(0 if ok else 1)
+PY
+[ $? -ne 0 ] && fail=1
 
 echo
 if [ $fail -eq 0 ]; then echo "全部通过 ✓"; else echo "有失败项 ✗"; fi

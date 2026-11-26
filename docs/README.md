@@ -12,8 +12,10 @@
 
 ## 定版信息
 
+- 包版本：见仓库根目录 `VERSION`（当前 `1.1.1`）
 - 定版日期：2026-11-26
-- 事实基准：`orca bot list` / `orca repo list` / `orca automations list` / `orca orchestration worker-show` / `worker-start --help` 实测
+- 事实基准：**Orca 1.4.278**（`orca bot list` / `orca repo list` / `orca automations list` / `orca orchestration worker-show` / `agent-context --json` 实测）
+- 升级或判据变更的经过见仓库根目录 `CHANGELOG.md`
 - **瞬时值不写进文档**（bot 个数、项目数、automation 数、工作区根目录）：一律现查
 
 ## 两份 HTML 是手工渲染副本
