@@ -1,0 +1,32 @@
+# 需要钉住的 CLI 原文：格式  标签|原文片段
+# drift.sh 逐条在当前 Orca 的 agent-context / skills 里找；找不到 = 判据可能已失效。
+# 加新条目时：标签写清"这条原文保证了什么结论"，原文片段取足够长、能唯一定位的连续字符串。
+
+# —— orchestration worker-start ——
+item-on 互斥|It can't be combined with --on.
+远程禁用 current|Remote current is invalid.
+远程可用三选|With --on, use an exact remote selector, new-child or new-top-level
+承载形态（不能写没有终端）|Not every worker has a terminal
+重试不继承位置|does not inherit placement
+重试要配原 Task|--retry-of needs --task naming the failed Task
+改 spec 就是新建 Task|--spec creates a new one
+创建类参数被拒|are rejected for current/existing worktrees
+terminal 复用时不给 worktree|When reusing --terminal, omit --worktree
+agent 是开放列举|such as claude, codex, cursor, antigravity, muse, zcode, opencode, or opencode2
+model 用 provider/id|Pi takes a provider/id --model
+effort 七档|off, minimal, low, medium, high, xhigh, max
+worktree 四值|current|selector|new-child|new-top-level
+
+# —— 状态枚举 ——
+Task 六态|Valid --status values: pending, ready, dispatched, completed, failed, blocked
+send 九种 type|Valid --type values: status, dispatch, worker_done, merge_ready, escalation, handoff, decision_gate, question, heartbeat
+worker_done 必须带 outcome|worker_done requires --outcome
+
+# —— worker 生命周期 ——
+abandon 不碰进程|Retains all possibly-live resources and performs no process or filesystem action
+release 是幂等清理|Post-completion cleanup for a settled
+list 默认只看绑定 Run|Without --run the list is scoped to the Run bound to the calling terminal
+
+# —— 其它 ——
+Run 不调度|A Run is a namespace and home inbox. It never schedules or places workers.
+worker-read 总可用|Read output with worker-read --source auto or --source transcript, which always work; --source terminal is refused when there is none

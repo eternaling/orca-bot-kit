@@ -8,13 +8,10 @@
 
 ## 待做
 
-### [HIGH] Orca 版本漂移监测
+### [HIGH] Orca 版本漂移监测 —— ✅ 已完成（v1.2.0）
 
-现状：所有 CLI 判据是照 **Orca 1.4.278** 核的，文档里写死了这个版本。Orca 升级后没人会主动重核。
-
-想法：
-- `scripts/drift.sh`：拉 `orca agent-context --json`，把本文档引用的每条 CLI 原文 grep 一遍，报「已消失/已改变」
-- 至少把 `orca --version` 与 VERSION 里的基准版本对比，不一致就提示「该对账了」
+`scripts/drift.sh` 已上线：21 条关键 CLI 原文逐条核对 + 版本比对，三条退出码（0/1/2）。
+以后 Orca 升版后第一件事就是跑它。
 
 ### [HIGH] 两份 HTML 仍是手抄副本
 

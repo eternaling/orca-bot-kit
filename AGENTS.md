@@ -12,6 +12,7 @@
 2. **要派 worker / 盯 worker / 验收** → 读 `skills/dispatch-worker/SKILL.md`（动作清单），细节去 md 的「三条岔路」。
 3. **要确认自己学会了** → 答 `docs/QUIZ.md`（23 题），判据在 `templates/self-test-key.md`。先答再看。
 4. **要改这里的任何说法** → 先读 `README.md` 的「维护」一节，按那三步做，再跑 `./scripts/check.sh`。
+5. **怀疑判据过期了（比如 Orca 升级过）** → 跑 `./scripts/drift.sh`。它把本文档依赖的 21 条 CLI 原文逐条拿到当前 Orca 里核对；退出码 1 就是有原文消失了。
 
 ## 硬约束（别违反）
 
@@ -30,3 +31,5 @@
 | 动手派活的步骤 | `skills/dispatch-worker/SKILL.md` |
 | 自测题 | `docs/QUIZ.md` |
 | 为什么是现在这个说法 | `docs/reviews/` 与 `CHANGELOG.md` |
+| 下一步要改什么 | `ROADMAP.md` |
+| 判据会不会已过期 | 跑 `./scripts/drift.sh` |

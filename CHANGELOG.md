@@ -22,6 +22,18 @@
 
 ---
 
+## v1.2.0 · 2026-11-26 · Orca 版本漂移监测
+
+新增 `scripts/drift.sh` + `scripts/drift-checks.txt` + `orca-baseline.txt`。
+
+为什么：`check.sh` 只查本仓库自身自洽，**看不见外部 CLI 变了**。判据过期是静默的——文档看着一切正常，引用的原文却已经不存在。
+
+怎么工作：把 21 条关键 CLI 原文逐条拿去当前 Orca 的 `agent-context --json` 与 `skills get orchestration` 里找；
+再比对 `orca-baseline.txt` 与 `orca --version`。三条退出码：0 无漂移 / 1 有原文消失 / 2 版本变了。
+
+**发布前已自测三条路径**：正常 → 0；注入假条目 → 1；版本写错 → 2。
+顺手抓到一条我自己凭记忆记岔的原文（`--source auto` 那句的开头），已改正。
+
 ## v1.1.1 · 2026-11-26
 
 补记 CHANGELOG 本身（v1.1.0 提交时漏了，自查发现）。首版起建立版本体系：`VERSION` 文件 + 语义化 tag。

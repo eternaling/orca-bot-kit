@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.1.1`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.2.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -114,6 +114,26 @@ cp templates/self-test-key.md "$BOT/memory/"
 1. **发现判据错了** —— 立即升，旧说法同时删干净（不要「保留但标注已废弃」两套并存）
 2. **Orca 自己升级了** —— 文档里的 CLI 行为是照 `1.4.278` 核的。Orca 升级后，涉及 CLI 的判据要**重核一遍**：`orca agent-context --json` 拿最新 schema，逐条对。核实后判据没变就不升版本，只在 CHANGELOG 记一句「已对账 X.Y.Z，无变化」。
 
+### 怎么知道该重核了：`drift.sh`
+
+不要靠人记得。跑：
+
+```bash
+./scripts/drift.sh            # 0=无漂移  1=有原文消失(判据可能失效)  2=Orca 版本变了
+./scripts/drift.sh --verbose  # 额外打出每条命中在哪
+```
+
+它把 `scripts/drift-checks.txt` 里那 21 条**关键 CLI 原文**逐条拿去当前 Orca 的
+`agent-context --json` 与 `skills get orchestration` 里找，找不到就报。
+外加比对 `orca-baseline.txt`（对账时的 Orca 版本）与当前 `orca --version`。
+
+**为什么必须单独一个脚本**：`check.sh` 只查本仓库自身是否自洽（标签、题数、版本号），
+它**看不见外部 CLI 变了**。判据过期是静默的——文档看着一切正常，但引用的原文已经不存在了。
+
+它已经抓到过一次：清单里原本写着「`read it with --source auto or --source transcript`」，
+而实际原文是 `Read output with worker-read --source auto or --source transcript, which always work; …`。
+那是我凭记忆记岔的句子——脚本一跑就露了。
+
 升级步骤：改内容 → `./scripts/check.sh`（会核对 `VERSION` 与 CHANGELOG 首节）- 加 CHANGELOG 一节 → 改 `VERSION` → commit → `git tag vX.Y.Z` → `git push --tags`。
 
 想知道下一步要改什么，看 [ROADMAP.md](ROADMAP.md)。
@@ -150,6 +170,9 @@ orca-bot-kit/
 ├── README.md                  ← 你正在读的（人看；也适合 bot 先扫一眼）
 ├── AGENTS.md                  ← agent harness 会自动读的落点（比 README 更直接）
 ├── CHANGELOG.md               ← 什么时候改了什么说法
+├── ROADMAP.md                 ← 已知缺口与下一步
+├── VERSION                    ← 包版本
+├── orca-baseline.txt          ← 对账时的 Orca 版本（drift.sh 拿它比）
 ├── LICENSE                    ← MIT
 ├── docs/
 │   ├── orca-map.md            ← 唯一事实来源
@@ -165,7 +188,9 @@ orca-bot-kit/
 │   └── self-test-key.md       ← 自测判据（别放进技能文件）
 └── scripts/
     ├── install.ps1            ← 装进某个 bot
-    └── check.sh               ← 机械检查
+    ├── check.sh               ← 机械检查（仓库自洽）
+    ├── drift.sh               ← Orca 版本漂移监测（外部 CLI 是否变了）
+    └── drift-checks.txt       ← 那 21 条关键 CLI 原文清单
 ```
 
 ---
