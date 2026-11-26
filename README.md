@@ -122,13 +122,16 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 ```
 orca-bot-kit/
-├── README.md                  ← 你正在读的（入口）
+├── README.md                  ← 你正在读的（人看；也适合 bot 先扫一眼）
+├── AGENTS.md                  ← agent harness 会自动读的落点（比 README 更直接）
 ├── CHANGELOG.md               ← 什么时候改了什么说法
+├── LICENSE                    ← MIT
 ├── docs/
 │   ├── orca-map.md            ← 唯一事实来源
 │   ├── orca-panorama.html     ← 全景图
 │   ├── orca-workflow.html     ← 流转图
 │   ├── QUIZ.md                ← 20 题 + 答案
+│   ├── README.md              ← 这个目录的文件清单与定版信息
 │   └── reviews/               ← 历史评审记录（为什么是现在这个说法）
 ├── skills/
 │   ├── orca-map/SKILL.md      ← 索引

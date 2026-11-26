@@ -8,7 +8,9 @@ description: >-
 
 # 派 worker 的清单
 
-这是 `~/.orca/docs/orca-map/orca-map.md`（主路 8 步 + 三条岔路）的可执行版本。口径只在那份，**本文件不再存第二份**。
+这是 Orca 地图（主路 8 步 + 三条岔路）的可执行版本。口径只存一份，**本文件不再存第二份**。
+
+那份地图在哪（按顺序找，第一个存在的就用）：`~/.orca/docs/orca-map/orca-map.md`（安装后的标准位置），或仓库里的 `docs/orca-map.md`。
 
 ## 派之前必查 5 项
 
