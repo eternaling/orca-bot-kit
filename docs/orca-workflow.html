@@ -107,10 +107,12 @@
         <h3><span class="d2"></span>失败 / 卡死</h3>
         <p>先看 Dispatch 的状态与原因（<code>worker-show</code> 的 <code>state</code> 是 <b>Dispatch</b> 四态 <code>ready / succeeded / failed / stopped</code>，不是 Task 六态），再分开处置：<b><code>stopReason=lost</code> / liveness <code>unverifiable</code> 先别动</b>——原 agent 可能仍在跑，此时<b>既不授权发信也不授权重试</b>，先 <code>worker-show</code> 判断，不确定就报告不确定；<code>state=failed</code> 或 <code>stopReason=exited</code> 才是进程退出已确认，看原因、需要就 <code>worker-stop</code>。<b>重试 ≠ 复制</b>：<code>--retry-of</code> 配 <code>--task &lt;失败的那个&gt;</code>，且<b>不继承位置</b>，<code>--on / --worktree / --agent（--terminal）</code> 四组都要重述。<b>改了 spec，就是新建一个 Task，不算重试</b>（CLI：<code>--spec creates a new one</code>）——那就只有两条路：要么放弃重试链按新 Task 派，要么不动 spec 去重试。三条兜底：换 agent / 换机器 / 自己接手。不盲目重启。</p>
         <div class="to">→ 回主路第 3–4 步，或直接收口</div>
+        <p style="margin-top:8px"><b>三种收场别搞混</b>：<code>worker-stop</code> 真的停（关终端、带 helper）；<code>worker-abandon</code> <b>只隔离不碰进程</b>（<code>Retains all possibly-live resources and performs no process or filesystem action.</code>）；<code>worker-release</code> 是完事后的清理（幂等）。<b>要取消 Task</b>：先 stop/abandon，再 <code>task-update --status failed --result cancelled</code>。</p>
       </div>
       <div class="br">
         <h3><span class="d3"></span>等你确认 / 要授权</h3>
-        <p>worker 停下等人类回答时是 <b>healthy，不是失败</b>。该回答就回答（<code>orchestration reply</code>），该你拍板就变成 Item 的 Needs you。但别把 <code>waitingOnHuman=unknown</code> 当「在等人」的证据：实测 <code>failed</code> / <code>stopped</code> 的记录也全是 unknown。</p>
+        <p>worker 停下等人类回答时是 <b>healthy，不是失败</b>。该回答就回答（<code>orchestration reply --id &lt;msg_id&gt; --body &lt;text&gt;</code>），该你拍板就变成 Item 的 Needs you。<b>怎么判它真在等人</b>：<code>worker-show --dispatch &lt;id&gt; --full</code> 里的 <code>observation.agentWait</code>——非空就是挂在一个只有人能回答的 prompt 上（带证据来源）；<code>null</code> 表示看过、没在等。</p>
+        <p>两个坑：<code>waitingOnHuman=unknown</code> 是<b>常态</b>（实测 failed/stopped 也是 unknown），不能当证据；<code>agentWait</code> 只在 <code>--full</code> 里有。另一类不是「等人」而是<b>要授权</b>：用 <code>deny --dispatch &lt;id&gt; --prompt &lt;approval_id&gt; --reason &lt;text&gt;</code> 拒掉，<b>它带着理由继续跑</b>，不是卡死，别去 stop。</p>
         <div class="to">→ 回答后它继续；否则挂在你身上</div>
       </div>
       <div class="br">

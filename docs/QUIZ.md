@@ -1,4 +1,4 @@
-# 考 bot：Orca 地图 20 问
+# 考 bot：Orca 地图 23 问
 
 用法：随便挑几条问 bot，看它答得对不对。**答案在最后，先别看。**
 
@@ -37,6 +37,12 @@
 18. 想把失败那次改好 spec，再用 `--retry-of` 重派，算重试吗？`--retry-of` 必须配哪个参数？
 19. 一条 dispatch 记录里有 `structworker_…` 资源标识，能说明它有可交互终端吗？判据是什么？
 20. `--environment local` 和 `--on <server>` 是一回事吗？
+
+## 三轮补考（2026-11-26 对账 1.4.278 命令面时新增）
+
+21. worker 卡住了，你想「先隔离住、但别动它的进程」，用 `worker-stop` 还是 `worker-abandon`？两者区别是什么？
+22. `send --type` 一共几种？`worker_done` 必须带什么？哪两种类型不能发给群组？
+23. 你只跑了 `worker-show --json`，看到 `waitingOnHuman=unknown`，能断定它不在等人吗？该怎么查？
 
 ---
 
@@ -91,10 +97,20 @@
 20. **不是一回事。** `--environment` 决定**这条命令连哪个 Orca**（`local` 或已配对 server 的 id/name）；`--on` 决定 **worker 落在哪个 server**（原文 `--on selects only the worker server; the Run and this command remain on the current Orca server.`）。两个维度不互斥，可以同时给；`--on` 也不保证文件可达（第 4 题）。
     ⚠️ 常见错答：把 `local` 当成 `--on` 的取值——`--on` 取的是 `saved-environment`。
 
+21. **`worker-abandon`。** `worker-stop` 真的停：关它的 agent 终端（`closed_agent_terminal`）、连同它启动的 helper 一起停。`worker-abandon` 原文是 `Retains all possibly-live resources and performs no process or filesystem action.`——**只隔离、不碰进程**，用在「我不确定它是不是还活着」的场合。两者都不删工作区。收尾清理用 `worker-release`（幂等）。
+    ⚠️ 常见错答：以为 abandon 也会停进程，于是重复 kill；或反过来说不清与 release 的区别。
+
+22. **九种**，原文：`Valid --type values: status, dispatch, worker_done, merge_ready, escalation, handoff, decision_gate, question, heartbeat.`
+    `worker_done` 必须带 `--outcome succeeded|failed`；**`worker_done` 和 `heartbeat` 不能发给群组**（它们是精确到 Dispatch 的信号）。
+    ⚠️ 常见错答：只答三种（handoff / question / status）——那是 bot 间交接的三种，不是 `--type` 的全部。
+
+23. **不能。** `waitingOnHuman=unknown` 是**常态**（实测 failed / stopped / succeeded 记录全是 unknown），它不能当证据。要看 `worker-show --dispatch <id> **--full**` 里的 **`observation.agentWait`**：非空才是真在等人（并带证据来源 hook / prompt-text / title），`null` 是 Orca 看过、没在等。普通 `--json` 看不到这个字段。
+    ⚠️ 常见错答：拿 unknown 当「在等人」去找人拍板；或反过来当「没人等」去催它。
+
 ---
 
 ## 判分
 
-- 20 题全对：bot 记住了这套东西，可以放心让它派活
-- 错在 1/2/3/5/6/13/14/16/17/18/20 这类事实题：说明它在凭记忆答，让它去读 `~/.orca/docs/orca-map/orca-map.md`
-- 错在 7/11/12/15/19 这类「含糊题」：说明它记住了结论但没理解区别，最危险——这种会让它拿错判据去冤枉 worker
+- 23 题全对：bot 记住了这套东西，可以放心让它派活
+- 错在 1/2/3/5/6/13/14/16/17/18/20/22 这类事实题：说明它在凭记忆答，让它去读 `~/.orca/docs/orca-map/orca-map.md`
+- 错在 7/11/12/15/19/21/23 这类「含糊题」：说明它记住了结论但没理解区别，最危险——这种会让它拿错判据去冤枉 worker

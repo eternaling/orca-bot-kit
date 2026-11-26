@@ -62,18 +62,18 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 1. 在你 bot 的 `SOUL.md` 里加一句指针（「派活与交付」这类小节）：
    > 结构与口径见 `~/.orca/docs/orca-map/orca-map.md`（唯一事实来源）。派活清单见 `skills/dispatch-worker`。内容不确定时读 md，不要凭记忆。
-2. 跑一遍自测：`docs/QUIZ.md` 20 题，答案在后半段。
+2. 跑一遍自测：`docs/QUIZ.md` 23 题，答案在后半段。
 
 ---
 
 ## 自测（怎么知道你真学会了）
 
-`docs/QUIZ.md` 共 **20 题**，覆盖四组概念、调度链、主路 8 步、三条岔路、几个必错的参数陷阱。
+`docs/QUIZ.md` 共 **23 题**，覆盖四组概念、调度链、主路 8 步、三条岔路、几个必错的参数陷阱。
 
 **判分标准比题目更严格**：
 - 只答结论不算过——要指出这条结论**依据哪句 CLI 原文，或者用哪条命令能验**
 - 出现「改了 spec 还挂回原 Task」「`--retry-of` 会继承原来的机器」这类答案，直接不及格
-- 20 题全对 = 可以放心让它派活
+- 23 题全对 = 可以放心让它派活
 
 判据（答案要点）在 `templates/self-test-key.md`。**它故意不放进技能文件**——放进去就成了抄答案，检不出「没读过原文」。
 
@@ -85,7 +85,7 @@ cp templates/self-test-key.md "$BOT/memory/"
 |---|---|---|
 | `docs/orca-map.md` | **唯一事实来源**：四组全景 + 术语表 + 主路 8 步 + 三条岔路 + 8 条已核口径 + 三条硬限制 + 参数取值 | 冲突时信它 |
 | `docs/orca-panorama.html` / `docs/orca-workflow.html` | 同一内容的两张图，自包含、无外部依赖，浏览器直接开 | md 的手工渲染副本 |
-| `docs/QUIZ.md` | 20 道自测题 + 答案 | 考题 |
+| `docs/QUIZ.md` | 23 道自测题 + 答案 | 考题 |
 
 两个技能是**索引不是正文**：
 - `skills/orca-map` —— 文件在哪、8 条口径的主题、什么时候读什么
@@ -130,7 +130,7 @@ orca-bot-kit/
 │   ├── orca-map.md            ← 唯一事实来源
 │   ├── orca-panorama.html     ← 全景图
 │   ├── orca-workflow.html     ← 流转图
-│   ├── QUIZ.md                ← 20 题 + 答案
+│   ├── QUIZ.md                ← 23 题 + 答案
 │   ├── README.md              ← 这个目录的文件清单与定版信息
 │   └── reviews/               ← 历史评审记录（为什么是现在这个说法）
 ├── skills/

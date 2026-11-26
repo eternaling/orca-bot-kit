@@ -123,13 +123,27 @@ Item 和 Automation 都是**辅助跟踪手段**，不是活着的必经层级�
 - **改了 spec，就是新建一个 Task，不算重试**（CLI：`--spec creates a new one`）→ 只有两条路：**要么放弃重试链按新 Task 派，要么不动 spec 去重试**
 - 三条兜底：**换 agent / 换机器 / 自己接手**
 
+**`worker-stop` 与 `worker-abandon` 不是一回事**：
+
+| | 行为 |
+|---|---|
+| `worker-stop --dispatch <id>` | 真的停：关它的 agent 终端（`closed_agent_terminal`）、连同它启动的 helper 一起停；**从不删工作区** |
+| `worker-abandon --dispatch <id>` | **只隔离、不碰进程**：原文 `Retains all possibly-live resources and performs no process or filesystem action.` 用在「我不确定它是不是还活着」的场合 |
+| `worker-release --dispatch <id>` | 完事后的清理：只关那个 coordinator 自己开的终端，可重复调（幂等） |
+
+**要取消一个 Task**（想真取消的，不要等它跑完）：先 `worker-stop` 或 `worker-abandon` 把 worker 处理掉，再 `task-update --id <task> --status failed --result cancelled`；以后想重做，`worker-start --retry-of` 会重开它（CLI 原文就给了这个顺序）。
+
 **不盲目重启。** 回到主路第 3–4 步，或直接收口。
 
 ### 岔路二：等你确认 / 要授权
 
-worker 停下等人类回答时是 **healthy，不是失败**。该回答就回答（`orca orchestration reply`），该你拍板就变成 Item 的 Needs you。回答后它继续；否则挂在你身上。
+worker 停下等人类回答时是 **healthy，不是失败**。该回答就回答（`orca orchestration reply --id <msg_id> --body <text>`），该你拍板就变成 Item 的 Needs you。回答后它继续；否则挂在你身上。
 
-（`waitingOnHuman=unknown` 是常态，实测 `failed` / `stopped` 的记录也全是 unknown，不能当「在等人」的证据。）
+**怎么判它真在等人**（别靠猜）：`worker-show --dispatch <id> --full` 里的 **`observation.agentWait`**——它非空就说明 worker 挂在一个只有人能回答的 prompt 上，并带证据来源（`hook` / `prompt-text` / `title`）；`null` 表示 Orca 看过、没在等人。
+
+⚠️ 表面字段不可靠：`waitingOnHuman=unknown` 是**常态**（实测 `failed` / `stopped` / `succeeded` 记录全是 unknown），不能当「在等人」的证据；`agentWait` 也只在 `--full` 里出现，普通 `--json` 看不到。
+
+还有一类不是「等人」而是「要授权」：worker 弹权限请求时用 `deny --dispatch <id> --prompt <approval_id> --reason <text>` 拒掉它——**worker 会带着这个理由继续走**，不是卡死，别去 stop。
 
 ### 岔路三：能力不符
 
@@ -156,13 +170,13 @@ worker 停下等人类回答时是 **healthy，不是失败**。该回答就回�
 # 已核对的口径（别再说错）
 
 1. **Run 不管调度**：`A Run is a namespace and home inbox. It never schedules or places workers.`
-2. **Task 六个状态**：`pending / ready / dispatched / completed / failed / blocked`
+2. **Task 六个状态**：`pending / ready / dispatched / completed / failed / blocked`（原文在 `orca orchestration task-update` 的 notes：`Valid --status values: pending, ready, dispatched, completed, failed, blocked.`——`--help` 里只写占位符，所以别拿 help 当依据）
 3. **不能写「worker 没有终端」**：CLI 说 `Not every worker has a terminal` = 没有**可交互终端窗格**；判据是 `worker-read --source terminal` 被拒（`archive_unavailable: … has no terminal output`）。结构化承载**常见**带 `structworker_…` 标识，但不是通则，别拿字段存在当证据
 4. **worker 的「种类」不是 Agent 清单**：`--agent` 是 `such as`（开放列举，非穷尽）
 5. **`--on` 只选 worker 所在的 Orca server**，不保证文件可达
 6. **判断 worker 是否真读了文件**：硬证据是 transcript 原话，不是「引不出细节」
 7. **Item 状态不是流水线**
-8. **bot 之间靠 handoff / question / status 交接**，不按项目划死边界
+8. **bot 之间靠 `handoff` / `question` / `status` 交接**，不按项目划死边界。但这三种只是 `send --type` 的一部分——共有**九种**，完整清单见下面「命令面」
 
 ## 另外三条硬限制（不计入上面 8 条）
 
@@ -190,6 +204,65 @@ worker 停下等人类回答时是 **healthy，不是失败**。该回答就回�
 | `--retry-of <dispatch_id>` | 必须配 `--task <失败的那个>`（原文 `--retry-of needs --task naming the failed Task`）；`--spec` 会新建 Task、位置不继承，处置在岔路一 |
 | `--keep-open` | 默认干完自己关：`Finished workers close on their own unless started with --keep-open`；新建工作区那两种还要看回执里的 `keepOpenByDefault` |
 | 创建类参数 | `--name` / `--repo` / `--base-branch` / `--display-name` / `--comment` / `--setup`：原文 `Creation flags (…) are rejected for current/existing worktrees.` 只对 `new-child` / `new-top-level` 用（见主路第 4 步） |
+
+---
+
+# 命令面（Orca 1.4.278 实测：`orca orchestration` 31 个子命令）
+
+前面的章节讲**概念与判断**；这一节讲**你手边到底有哪些命令**。不常用的命令不必背，但要知道它存在——否则会绕着弯做事。
+
+## 你日常用的（十个）
+
+| 命令 | 干什么 |
+|---|---|
+| `worker-start` | 派一次活（参数在上一节） |
+| `worker-show` | 看一个 dispatch 的状态；**加 `--full` 才有 `observation`** |
+| `worker-read` | 读它的产出（`--source auto` 最常用） |
+| `worker-list` | 列你的 worker |
+| `worker-stop` / `worker-abandon` / `worker-release` | 三种收场，见岔路一那张表 |
+| `reply` | 回答 worker 的问题（`--id <msg_id> --body <text>`） |
+| `send` | 给 worker / 别的 bot / Run 发信（类型见下） |
+| `inbox` / `check` | 看收件箱；`check` 是消费式的（读过的批次会被标记，下次只给新的） |
+
+## 容易漏掉的（存在但常被忘记）
+
+| 命令 | 什么时候用 |
+|---|---|
+| `worker-keep-open` | 不想让它干完就关（取消自动释放的那个例外）；`worker-release` 可手动清掉这个例外 |
+| `deny` | 拒掉 worker 的权限请求，**它带着理由继续跑**（不是杀它） |
+| `task-create` / `task-list` / `task-update` | 自己建任务、看状态、改状态（含「取消」那套） |
+| `dispatch` | 把一个 Task 派到**已有终端**（与 `worker-start` 新建不同）；`--dry-run` 可以先看 preamble |
+| `dispatch-show` / `request-show` | 查 dispatch 上下文；**不确定上一次改动有没有生效**时用 `request-show`（只读，安全） |
+| `gate-create` / `gate-resolve` / `gate-list` | **决策门**：把一个 Task 卡在“等人拍板”上。比在聊天里问一句更结构化 |
+| `run-create` / `run-use` / `run-current` / `run-list` / `run-show` | 管 Run（命名空间 + 收件箱） |
+| `reset` | 清 orchestration 状态（`--all` / `--tasks` / `--messages`），破坏性，少用 |
+
+## `send --type` 有九种（不是三种）
+
+原文：`Valid --type values: status, dispatch, worker_done, merge_ready, escalation, handoff, decision_gate, question, heartbeat.`
+
+| 类型 | 含义 |
+|---|---|
+| `handoff` | 连责任一起交出去（对别的 bot 用这个） |
+| `question` | 只请教，自己仍负责收尾 |
+| `status` | 只同步，不转移责任 |
+| `worker_done` | worker 报告完成，**必须带 `--outcome succeeded\|failed`** |
+| `escalation` | 升级：卡住 / 要授权 / 失联 |
+| `merge_ready` | 分支可合了 |
+| `decision_gate` | 需人拍板 |
+| `dispatch` | 派发通知 |
+| `heartbeat` | 心眺 |
+
+两个坑：`worker_done` 和 `heartbeat` 是**精确到 Dispatch** 的信号，不能发给群组；不传 `--to` 就用该 Dispatch 的 Run 收件箱。
+
+## 两个容易误会的 scope
+
+- **`worker-list` 默认只看当前绑定的 Run**（原文 `Without --run the list is scoped to the Run bound to the calling terminal`），最多 100 条。所以「我只有 12 个 worker」很可能只是这个 Run 里 12 个。
+- **`inbox` 不传 `--terminal` / `--run` 就是整台 Orca 的全部邮箱**，范围大得多。
+
+## 两个已退役的命令
+
+`coordinator-start` / `coordinator-stop` **不再有副作用**，调用只会返回一句提示（“改用 Run / Task / worker-start 那套基元”）。看到别人（或旧文档）叫你用它们，直接跳过。
 
 ---
 

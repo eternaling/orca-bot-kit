@@ -55,4 +55,4 @@ Write-Host ""
 Write-Host "装好了。还差两步（脚本不替你改这些文件）：" -ForegroundColor Yellow
 Write-Host "  1) 在 $BotDir\SOUL.md 的「派活与交付」小节加一句："
 Write-Host "     结构与口径见 $DocsDir\orca-map.md（唯一事实来源）。派活清单见 skills/dispatch-worker。内容不确定时读 md，不要凭记忆。" -ForegroundColor DarkGray
-Write-Host "  2) 跑一遍自测：$DocsDir\QUIZ.md 共 20 题，判据在 $mem\self-test-key.md（先答题再看）"
+Write-Host "  2) 跑一遍自测：$DocsDir\QUIZ.md 共 23 题，判据在 $mem\self-test-key.md（先答题再看）"

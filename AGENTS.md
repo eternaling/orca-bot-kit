@@ -10,7 +10,7 @@
 
 1. **要知道 Orca 的结构** → 读 `docs/orca-map.md`。它是**唯一事实来源**；两份 HTML 是它的渲染副本，冲突时信 md。
 2. **要派 worker / 盯 worker / 验收** → 读 `skills/dispatch-worker/SKILL.md`（动作清单），细节去 md 的「三条岔路」。
-3. **要确认自己学会了** → 答 `docs/QUIZ.md`（20 题），判据在 `templates/self-test-key.md`。先答再看。
+3. **要确认自己学会了** → 答 `docs/QUIZ.md`（23 题），判据在 `templates/self-test-key.md`。先答再看。
 4. **要改这里的任何说法** → 先读 `README.md` 的「维护」一节，按那三步做，再跑 `./scripts/check.sh`。
 
 ## 硬约束（别违反）

@@ -132,6 +132,8 @@
       <tr><td class="b">Worktree</td><td>文件位置。<code>--worktree</code> 四值，其中 <code>current</code> 指当前工作区；四个取值与远程限制见 ⑥。</td></tr>
       <tr><td class="b">Item</td><td>跨回合台账，给人看的进度和责任；不强制、不等于任务本身。</td></tr>
       <tr><td class="b">Automation</td><td>到点或遇到事件时启动一次；能听什么取决于 trigger-options（很多要连接器）。</td></tr>
+      <tr><td class="b">send --type</td><td>给 worker / 别的 bot / Run 发信，共<b>九种</b>类型（不是三种）：<code>handoff</code> / <code>question</code> / <code>status</code> / <code>worker_done</code> / <code>escalation</code> / <code>merge_ready</code> / <code>decision_gate</code> / <code>dispatch</code> / <code>heartbeat</code>。含义与坑见 md「命令面」。</td></tr>
+      <tr><td class="b">三种收场</td><td><code>worker-stop</code> 真停（关终端）/ <code>worker-abandon</code> 只隔离<b>不碰进程</b> / <code>worker-release</code> 事后清理（幂等）。细节见流转图岔路一。</td></tr>
       </tbody>
     </table>
     </div>
