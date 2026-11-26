@@ -55,6 +55,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div style="font-size:12px;color:var(--muted-foreground,#6b7280);border-left:3px solid var(--chart-3,#d97706);padding:7px 12px;margin:0 0 14px;background:var(--muted,#f7f7f9);border-radius:0 6px 6px 0"><b>这是手工绘制的结构示意图，可能落后于事实源。</b>权威且完整的内容见 <code>orca-map.html</code>（由 <code>docs/orca-map.md</code> 自动生成，<code>check.sh</code> 保证同步）。本图只负责表达结构关系，具体措辞与判据一律以 md 为准。</div>
   <h1>一件活怎么流下去（主路 + 三条岔路）</h1>
   <p class="sub">橙色=你，蓝色=bot，绿色=worker；除了成功那条主路，失败、能力不符、等你确认三条岔路也画上了</p>
   <div class="fix">派完就结束回合只是顺利时的一半：worker 可能失败重试、可能卡在等你确认（healthy but waiting for human）、也可能压根没能力碰这份材料。</div>

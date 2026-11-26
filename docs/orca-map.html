@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orca 地图 v1.3.0</title>
+<style>
+  :root{--fg:#17181c;--muted:#5f6470;--bd:#e3e4e9;--bg:#fff;--soft:#f7f8fa;--acc:#2563eb;--warn:#b45309}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--soft);color:var(--fg);line-height:1.65;
+       font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px}
+  .page{max-width:980px;margin:0 auto;padding:28px 20px 60px}
+  .card{background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:26px 28px}
+  header.bar{border-bottom:1px solid var(--bd);padding-bottom:14px;margin-bottom:18px}
+  .badge{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:999px;
+         border:1px solid var(--bd);background:var(--soft);color:var(--muted);margin-right:6px}
+  .gen{font-size:12px;color:var(--muted);background:#fffbeb;border-left:3px solid var(--warn);
+       padding:8px 12px;border-radius:0 6px 6px 0;margin:12px 0 0}
+  nav.toc{background:var(--soft);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;margin:18px 0 26px}
+  nav.toc ul{margin:6px 0 0;padding-left:16px;columns:2;column-gap:26px}
+  nav.toc li{font-size:12.5px;margin:1px 0;list-style:none}
+  nav.toc li.lv1{font-weight:600;margin-top:6px}
+  nav.toc a{color:var(--acc);text-decoration:none}
+  nav.toc a:hover{text-decoration:underline}
+  h1{font-size:21px;margin:34px 0 10px;padding-top:8px}
+  h1:first-of-type{margin-top:8px}
+  h2{font-size:16px;margin:26px 0 8px}
+  h3{font-size:14px;margin:18px 0 6px;color:var(--muted)}
+  p{margin:8px 0}
+  hr{border:0;border-top:1px solid var(--bd);margin:26px 0}
+  code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;
+       background:#eef0f4;border-radius:4px;padding:1px 5px}
+  pre{background:#1f2430;color:#e6e8ee;border-radius:9px;padding:13px 15px;overflow-x:auto;margin:12px 0}
+  pre code{background:none;color:inherit;padding:0;font-size:12.5px;white-space:pre}
+  b{font-weight:650}
+  ul,ol{margin:8px 0;padding-left:22px}
+  li{margin:3px 0}
+  .tw{overflow-x:auto;margin:12px 0}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--bg)}
+  th,td{border:1px solid var(--bd);padding:7px 10px;vertical-align:top}
+  th{background:var(--soft);font-size:12px;color:var(--muted);font-weight:600}
+  @media(max-width:640px){nav.toc ul{columns:1}.page{padding:16px 12px 40px}.card{padding:18px 15px}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="card">
+<header class="bar">
+  <span class="badge">v1.3.0</span><span class="badge">md 指纹 81376e7e</span>
+  <span class="badge">事实基准 Orca 1.4.278</span>
+  <div class="gen"><b>本文件由 <code>node scripts/build-html.js</code> 生成，不要手改。</b>
+  内容与 <code>docs/orca-map.md</code> 同步（指纹不一致时 <code>check.sh</code> 会失败）。
+  想看结构关系示意图，见 <code>orca-panorama.html</code> / <code>orca-workflow.html</code>（手工绘制，可能落后于 md）。</div>
+</header>
+<nav class="toc"><b>目录</b><ul><li class="lv1"><a href="#s1-orca-地图-markdown-版-定版-2026-11-26">Orca 地图（Markdown 版 · 定版 2026-11-26）</a></li><li class="lv1"><a href="#s2-第一部分-全景-有哪些东西">第一部分：全景（有哪些东西）</a></li><li class="lv2"><a href="#s3-①-身份与对话">① 身份与对话</a></li><li class="lv2"><a href="#s4-②-协调与调度-一条调度链">② 协调与调度（一条调度链）</a></li><li class="lv2"><a href="#s5-③-文件与场地">③ 文件与场地</a></li><li class="lv2"><a href="#s6-④-跟踪">④ 跟踪</a></li><li class="lv2"><a href="#s7-⑤-术语一句话对照">⑤ 术语一句话对照</a></li><li class="lv1"><a href="#s8-第二部分-流转-活怎么走">第二部分：流转（活怎么走）</a></li><li class="lv2"><a href="#s9-主路-8-步">主路 8 步</a></li><li class="lv2"><a href="#s10-三条岔路">三条岔路</a></li><li class="lv2"><a href="#s14-要不要开-worker-不绝对-看这几种情形">要不要开 worker（不绝对，看这几种情形）</a></li><li class="lv1"><a href="#s15-已核对的口径-别再说错">已核对的口径（别再说错）</a></li><li class="lv2"><a href="#s16-另外三条硬限制-不计入上面-8-条">另外三条硬限制（不计入上面 8 条）</a></li><li class="lv2"><a href="#s17-参数取值-全文档唯一一份-会随版本变-引用前-orca-orchestration-worker-start-help-重验">参数取值（全文档唯一一份；会随版本变，引用前 orca orchestration worker-start --help 重验）</a></li><li class="lv1"><a href="#s18-命令面-orca-1-4-278-实测-orca-orchestration-31-个子命令">命令面（Orca 1.4.278 实测：orca orchestration 31 个子命令）</a></li><li class="lv2"><a href="#s19-你日常用的-十个">你日常用的（十个）</a></li><li class="lv2"><a href="#s20-容易漏掉的-存在但常被忘记">容易漏掉的（存在但常被忘记）</a></li><li class="lv2"><a href="#s21-send-type-有九种-不是三种">send --type 有九种（不是三种）</a></li><li class="lv2"><a href="#s22-两个容易误会的-scope">两个容易误会的 scope</a></li><li class="lv2"><a href="#s23-两个已退役的命令">两个已退役的命令</a></li><li class="lv1"><a href="#s24-维护">维护</a></li></ul></nav>
+<h1 id="s1-orca-地图-markdown-版-定版-2026-11-26">Orca 地图（Markdown 版 · 定版 2026-11-26）</h1>
+<p><b>这份是唯一事实来源。</b> 两份 HTML（<code>orca-panorama.html</code> / <code>orca-workflow.html</code>）是它的浏览版， <code>QUIZ.md</code> 和 <code>README.md</code> 引用它，<code>skills/orca-map</code> 与 <code>skills/dispatch-worker</code> 只留指针—— <b>口径详文、参数取值、维护清单都只在本文件此处一份</b>，别处不存第二份（存过，然后漂移了）。</p>
+<p>事实基准：本机 local，2026-11-26 核对。快照数字会过期，引用前现查：</p>
+<pre data-lang="bash"><code>orca bot list          # 5 个 bot
+orca repo list         # 9 行，含 ~ 家目录，不是 9 个代码项目
+orca automations list  # 0 个</code></pre>
+<hr>
+<h1 id="s2-第一部分-全景-有哪些东西">第一部分：全景（有哪些东西）</h1>
+<h2 id="s3-①-身份与对话">① 身份与对话</h2>
+<div class="tw"><table><thead><tr><th style="text-align:left">东西</th><th style="text-align:left">是什么</th></tr></thead><tbody><tr><td style="text-align:left"><b>Bot ×5</b></td><td style="text-align:left">长期身份。jarvis / local / night / ali / nas，各有 SOUL + 记忆 + 职责。</td></tr><tr><td style="text-align:left"><b>Home Chat</b></td><td style="text-align:left">每个 bot 一个常驻对话，别人派活落这里。</td></tr><tr><td style="text-align:left"><b>子聊天</b></td><td style="text-align:left">隔离另一个话题，不是新建了 bot 或工作区。</td></tr></tbody></table></div>
+<p><b>bot ↔ bot 是交接，不是划界：</b></p>
+<div class="tw"><table><thead><tr><th style="text-align:left">类型</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td style="text-align:left"><code>--type handoff</code></td><td style="text-align:left">连责任一起交出去，对方负责交付和答复</td></tr><tr><td style="text-align:left"><code>--type question</code></td><td style="text-align:left">只请教，自己仍负责收尾</td></tr><tr><td style="text-align:left"><code>--type status</code></td><td style="text-align:left">只同步背景，不转移责任</td></tr></tbody></table></div>
+<h2 id="s4-②-协调与调度-一条调度链">② 协调与调度（一条调度链）</h2>
+<pre><code>Run → Task → Dispatch → Worker</code></pre>
+<p>箭头只表示先后顺序，不是包含关系。</p>
+<div class="tw"><table><thead><tr><th style="text-align:left">环节</th><th style="text-align:left">是什么</th></tr></thead><tbody><tr><td style="text-align:left"><b>Run</b></td><td style="text-align:left">命名空间 + 收件箱。自己不调度、不挑机器。不绑 Run 时 <code>worker-start</code> 会自己建一个。</td></tr><tr><td style="text-align:left"><b>Task</b></td><td style="text-align:left">要做的事。状态：<code>pending / ready / dispatched / completed / failed / blocked</code>。</td></tr><tr><td style="text-align:left"><b>Dispatch</b></td><td style="text-align:left">一次派发的记录（<code>ctx_…</code>）。同一个 Task 可以重试多次、有好几个 dispatch。</td></tr><tr><td style="text-align:left"><b>Worker</b></td><td style="text-align:left">受监督的执行实例，由某个 Agent 启动。</td></tr></tbody></table></div>
+<p><b>Worker ≠ Agent。</b> Worker 是执行实例，Agent 是启动它的执行程序：<code>pi / claude / codex / cursor / antigravity / muse / zcode / opencode / opencode2</code>。所谓「worker 分好几种」，其实是 Agent 类型不同，加上承载形态不同。</p>
+<p><b>承载形态至少两种：</b></p>
+<div class="tw"><table><thead><tr><th style="text-align:left">形态</th><th style="text-align:left">表现</th><th style="text-align:left">注意</th></tr></thead><tbody><tr><td style="text-align:left">结构化（聊天）承载</td><td style="text-align:left">不提供普通可交互的 terminal 窗格，在 Orca 里表现为<b>一个聊天窗口</b></td><td style="text-align:left">关掉这个窗口 → 该次 dispatch 失败：<code>lastError="Terminal closed by operator request"</code></td></tr><tr><td style="text-align:left">普通 terminal 承载</td><td style="text-align:left">有可交互终端</td><td style="text-align:left">也可以用 <code>--terminal</code> 直接复用已有终端</td></tr></tbody></table></div>
+<h2 id="s5-③-文件与场地">③ 文件与场地</h2>
+<div class="tw"><table><thead><tr><th style="text-align:left">东西</th><th style="text-align:left">是什么</th><th style="text-align:left">实例</th></tr></thead><tbody><tr><td style="text-align:left"><b>Repo</b></td><td style="text-align:left">项目本体，主工作树就在原路径</td><td style="text-align:left"><code>D:/night/gitea/night-flow</code></td></tr><tr><td style="text-align:left"><b>工作区根目录</b></td><td style="text-align:left">全局设置，新工作区默认建在这里</td><td style="text-align:left"><code>D:\night\orca\workspaces</code>（2026-11-26 从 C 盘改到 D 盘）</td></tr><tr><td style="text-align:left"><b>Git worktree</b></td><td style="text-align:left">独立工作目录；通常检出一个分支，也可处于 detached HEAD</td><td style="text-align:left"><code>…/night-flow/wallet-subscription</code></td></tr><tr><td style="text-align:left"><b>Folder 工作区</b></td><td style="text-align:left">不是 git 也能开</td><td style="text-align:left"><code>C:\Users\night\.orca\bots\local-bot</code></td></tr></tbody></table></div>
+<p>注意：</p>
+<ul><li>「一个分支一个目录」只描述 Git worktree；主工作树留在 repo 原路径，新工作区才在根目录下。</li><li>worker <b>不是必须</b>新建工作区（可用 <code>--worktree current</code> / 已有工作区）。</li></ul>
+<h2 id="s6-④-跟踪">④ 跟踪</h2>
+<div class="tw"><table><thead><tr><th style="text-align:left">东西</th><th style="text-align:left">是什么</th></tr></thead><tbody><tr><td style="text-align:left"><b>Item 台账</b></td><td style="text-align:left">跨回合跟踪。开着时是这几个状态之一：Planned（还没动）/ In progress（在干）/ Waiting（等外部）/ Needs you（等你决定）——<b>不是一条必须按顺序走的流水线</b></td></tr><tr><td style="text-align:left"><b>Automation</b></td><td style="text-align:left">按时间或事件触发一次后续。能监听什么取决于 <code>trigger-options</code>（很多要接 GitHub 等连接器）</td></tr></tbody></table></div>
+<p>Item 和 Automation 都是<b>辅助跟踪手段</b>，不是活着的必经层级，也不是开 worker 的前提。</p>
+<h2 id="s7-⑤-术语一句话对照">⑤ 术语一句话对照</h2>
+<div class="tw"><table><thead><tr><th style="text-align:left">词</th><th style="text-align:left">一句话</th></tr></thead><tbody><tr><td style="text-align:left">Run</td><td style="text-align:left">命名空间 + 收件箱。自己不管调度、不挑机器。</td></tr><tr><td style="text-align:left">Task</td><td style="text-align:left">要做的事。六个状态见上。</td></tr><tr><td style="text-align:left">Dispatch</td><td style="text-align:left">一次派发的记录（<code>ctx_…</code>）。</td></tr><tr><td style="text-align:left">Worker</td><td style="text-align:left">受监督的执行实例。按执行程序（Agent）和承载形态两条轴描述。</td></tr><tr><td style="text-align:left">Agent</td><td style="text-align:left">启动 worker 用的执行程序类型。</td></tr><tr><td style="text-align:left">Worktree</td><td style="text-align:left">文件位置。新建工作目录 / 已有工作区 / 当前工作区都行。</td></tr><tr><td style="text-align:left">Item</td><td style="text-align:left">跨回合台账，给人看的进度和责任；不强制、不等于任务本身。</td></tr><tr><td style="text-align:left">Automation</td><td style="text-align:left">到点或遇到事件时启动一次。</td></tr></tbody></table></div>
+<hr>
+<h1 id="s8-第二部分-流转-活怎么走">第二部分：流转（活怎么走）</h1>
+<h2 id="s9-主路-8-步">主路 8 步</h2>
+<div class="tw"><table><thead><tr><th style="text-align:left">步</th><th style="text-align:left">谁</th><th style="text-align:left">做什么</th><th style="text-align:left">关键点</th></tr></thead><tbody><tr><td style="text-align:left">1</td><td style="text-align:left"><b>你</b></td><td style="text-align:left">说需求 + 完成标准 + 依赖的本机条件</td><td style="text-align:left">要读本机文件、要联网、要某个 CLI 权限，先说</td></tr><tr><td style="text-align:left">2</td><td style="text-align:left">Bot</td><td style="text-align:left">选执行方式：自己干 / 开 worker / 交给另一个 bot</td><td style="text-align:left">小而可当场验证 → 自己做；要隔离、跑久、并行、独立评审 → 开 worker。不是硬门槛</td></tr><tr><td style="text-align:left">3</td><td style="text-align:left">Bot</td><td style="text-align:left"><b>派发前先确认对方够得到料</b></td><td style="text-align:left"><code>--on</code> 选的是 worker 所在的 Orca server，Run 和发起命令仍在当前 server；<b>不保证它读得到另一台机器上的目录</b></td></tr><tr><td style="text-align:left">4</td><td style="text-align:left">Bot</td><td style="text-align:left">写 spec 并派发</td><td style="text-align:left">范围、不可动的东西、验收证据、交付格式；模型用 <code>--model provider/id</code> + <code>--effort off…max</code>；目标是 <code>current</code> 或已有工作区时<b>不带</b> <code>--name/--repo/--base-branch/--display-name/--comment/--setup</code>（会被拒）；<code>--item</code> <b>不能与</b> <code>--on</code> 同用</td></tr><tr><td style="text-align:left">5</td><td style="text-align:left">Worker</td><td style="text-align:left">在<b>选定的</b>工作区里干（新建 / 已有 / current 都可能）：改 → 验证 → 报告</td><td style="text-align:left">不一定都开 PR；一个工作区一个写手；多人协作先划清文件所有权</td></tr><tr><td style="text-align:left">6</td><td style="text-align:left">Bot</td><td style="text-align:left">不等轮询：靠 Orca 通知，但要分清四种结局</td><td style="text-align:left"><b>成功 → 第 7 步</b>；<b>其余三种</b>（失败 / 等人类回答 / 能力不符）分别走三条岔路</td></tr><tr><td style="text-align:left">7</td><td style="text-align:left">Bot</td><td style="text-align:left">验收：看实际改动 + 测试证据 + 剩余事项</td><td style="text-align:left">按风险决定要不要 reviewer；验收不过回第 4 步，不重开一件事</td></tr><tr><td style="text-align:left">8</td><td style="text-align:left"><b>你</b></td><td style="text-align:left">看结论 + 拍板；点头之后才清理场地</td><td style="text-align:left"><code>orca worktree rm</code> 由 bot 执行，你只管点头</td></tr></tbody></table></div>
+<p>真实案例：读本机两份 HTML → 选执行方式 → 先确认它读得到 → 派发 → 验收 → 清理。<b>第一次就是第 3 步没验，白跑三次</b>（一次自称无权限照写、两次承载被关掉）。</p>
+<h2 id="s10-三条岔路">三条岔路</h2>
+<h3 id="s11-岔路一-失败-卡死">岔路一：失败 / 卡死</h3>
+<p>检查 Dispatch 的状态与原因，再决定（注意：<code>worker-show</code> 里的 <code>state</code> 是 <b>Dispatch</b> 的状态：<code>ready</code> / <code>succeeded</code> / <code>failed</code> / <code>stopped</code>，<b>不是</b> Task 的六态）：</p>
+<ul><li><b><code>stopReason=lost</code> / liveness <code>unverifiable</code>：先别动。</b> 原 agent 可能仍在跑，此时<b>既不授权发信也不授权重试</b>，先 <code>worker-show</code> 判断，不确定就报告不确定</li><li><code>state=failed</code> 或 <code>stopReason=exited</code>：进程退出已确认 → 看原因 → 需要就 <code>worker-stop</code>，再按下一条重试</li><li><b>重试 ≠ 复制</b>：<code>--retry-of</code> 配 <code>--task &lt;失败的那个&gt;</code>，且<b>不继承位置</b>，<code>--on / --worktree / --agent（--terminal）</code> 四组都要重述</li><li><b>改了 spec，就是新建一个 Task，不算重试</b>（CLI：<code>--spec creates a new one</code>）→ 只有两条路：<b>要么放弃重试链按新 Task 派，要么不动 spec 去重试</b></li><li>三条兜底：<b>换 agent / 换机器 / 自己接手</b></li></ul>
+<p><b><code>worker-stop</code> 与 <code>worker-abandon</code> 不是一回事</b>：</p>
+<div class="tw"><table><thead><tr><th style="text-align:left"></th><th style="text-align:left">行为</th></tr></thead><tbody><tr><td style="text-align:left"><code>worker-stop --dispatch &lt;id&gt;</code></td><td style="text-align:left">真的停：关它的 agent 终端（<code>closed_agent_terminal</code>）、连同它启动的 helper 一起停；<b>从不删工作区</b></td></tr><tr><td style="text-align:left"><code>worker-abandon --dispatch &lt;id&gt;</code></td><td style="text-align:left"><b>只隔离、不碰进程</b>：原文 <code>Retains all possibly-live resources and performs no process or filesystem action.</code> 用在「我不确定它是不是还活着」的场合</td></tr><tr><td style="text-align:left"><code>worker-release --dispatch &lt;id&gt;</code></td><td style="text-align:left">完事后的清理：只关那个 coordinator 自己开的终端，可重复调（幂等）</td></tr></tbody></table></div>
+<p><b>要取消一个 Task</b>（想真取消的，不要等它跑完）：先 <code>worker-stop</code> 或 <code>worker-abandon</code> 把 worker 处理掉，再 <code>task-update --id &lt;task&gt; --status failed --result cancelled</code>；以后想重做，<code>worker-start --retry-of</code> 会重开它（CLI 原文就给了这个顺序）。</p>
+<p><b>不盲目重启。</b> 回到主路第 3–4 步，或直接收口。</p>
+<h3 id="s12-岔路二-等你确认-要授权">岔路二：等你确认 / 要授权</h3>
+<p>worker 停下等人类回答时是 <b>healthy，不是失败</b>。该回答就回答（<code>orca orchestration reply --id &lt;msg_id&gt; --body &lt;text&gt;</code>），该你拍板就变成 Item 的 Needs you。回答后它继续；否则挂在你身上。</p>
+<p><b>怎么判它真在等人</b>（别靠猜）：<code>worker-show --dispatch &lt;id&gt; --full</code> 里的 <b><code>observation.agentWait</code></b>——它非空就说明 worker 挂在一个只有人能回答的 prompt 上，并带证据来源（<code>hook</code> / <code>prompt-text</code> / <code>title</code>）；<code>null</code> 表示 Orca 看过、没在等人。</p>
+<p>⚠️ 表面字段不可靠：<code>waitingOnHuman=unknown</code> 是<b>常态</b>（实测 <code>failed</code> / <code>stopped</code> / <code>succeeded</code> 记录全是 unknown），不能当「在等人」的证据；<code>agentWait</code> 也只在 <code>--full</code> 里出现，普通 <code>--json</code> 看不到。</p>
+<p>还有一类不是「等人」而是「要授权」：worker 弹权限请求时用 <code>deny --dispatch &lt;id&gt; --prompt &lt;approval_id&gt; --reason &lt;text&gt;</code> 拒掉它——<b>worker 会带着这个理由继续走</b>，不是卡死，别去 stop。</p>
+<h3 id="s13-岔路三-能力不符">岔路三：能力不符</h3>
+<p>它没读到原文却照样写报告。</p>
+<ul><li><b>最硬的证据是 transcript 自述</b>（<code>orca orchestration worker-read --dispatch &lt;id&gt; --source transcript</code> 能看到它原话）</li><li>「要求它引用只有读过才知道的细节」是<b>降级判据</b>——引不出只说明它没给可验证证据，不能反过来当成「肯定没读」</li><li>这<b>不是 Orca 放错机器</b>：出事的 workspace 都是本机 bot home，问题是 worker 自我误判能力后仍然交付</li><li>处置：停掉，改派能碰到料的 agent/机器</li></ul>
+<h2 id="s14-要不要开-worker-不绝对-看这几种情形">要不要开 worker（不绝对，看这几种情形）</h2>
+<div class="tw"><table><thead><tr><th style="text-align:left">情形</th><th style="text-align:left">怎么选</th></tr></thead><tbody><tr><td style="text-align:left">查一下、回一句、改一行</td><td style="text-align:left">自己做，派发的开销比活大</td></tr><tr><td style="text-align:left">要动项目代码、要跑很久、要隔离</td><td style="text-align:left">开 worker（新工作区或已有工作区都行）</td></tr><tr><td style="text-align:left">几件互不相干的事</td><td style="text-align:left">并行开，但并发量按当前容量控，不要一次铺满</td></tr><tr><td style="text-align:left">要独立第二意见</td><td style="text-align:left">按风险决定开不开 reviewer，不是每次都开</td></tr><tr><td style="text-align:left">要等外部（CI / 别人评审 / 到点）</td><td style="text-align:left">建 automation 等待 + 留 Item 记账；能用什么触发看 <code>trigger-options</code></td></tr><tr><td style="text-align:left">整件事该另一个 bot 负责</td><td style="text-align:left"><code>--type handoff</code> 连责任一起交；只是请教用 <code>question</code>，只同步用 <code>status</code></td></tr></tbody></table></div>
+<hr>
+<h1 id="s15-已核对的口径-别再说错">已核对的口径（别再说错）</h1>
+<ol><li><b>Run 不管调度</b>：<code>A Run is a namespace and home inbox. It never schedules or places workers.</code></li><li><b>Task 六个状态</b>：<code>pending / ready / dispatched / completed / failed / blocked</code>（原文在 <code>orca orchestration task-update</code> 的 notes：<code>Valid --status values: pending, ready, dispatched, completed, failed, blocked.</code>——<code>--help</code> 里只写占位符，所以别拿 help 当依据）</li><li><b>不能写「worker 没有终端」</b>：CLI 说 <code>Not every worker has a terminal</code> = 没有<b>可交互终端窗格</b>；判据是 <code>worker-read --source terminal</code> 被拒（<code>archive_unavailable: … has no terminal output</code>）。结构化承载<b>常见</b>带 <code>structworker_…</code> 标识，但不是通则，别拿字段存在当证据</li><li><b>worker 的「种类」不是 Agent 清单</b>：<code>--agent</code> 是 <code>such as</code>（开放列举，非穷尽）</li><li><b><code>--on</code> 只选 worker 所在的 Orca server</b>，不保证文件可达</li><li><b>判断 worker 是否真读了文件</b>：硬证据是 transcript 原话，不是「引不出细节」</li><li><b>Item 状态不是流水线</b></li><li><b>bot 之间靠 <code>handoff</code> / <code>question</code> / <code>status</code> 交接</b>，不按项目划死边界。但这三种只是 <code>send --type</code> 的一部分——共有<b>九种</b>，完整清单见下面「命令面」</li></ol>
+<h2 id="s16-另外三条硬限制-不计入上面-8-条">另外三条硬限制（不计入上面 8 条）</h2>
+<ul><li><b><code>--worktree</code> 远程限制</b>：<b>远程不能用 <code>current</code></b>（<code>Remote current is invalid.</code>）；远程能用的是 exact remote selector / <code>new-child</code> / <code>new-top-level</code>（后两者需远程 <code>--repo</code>），四个取值见下一节</li><li><b><code>--item</code> 与 <code>--on</code> 互斥</b>：<code>It can't be combined with --on.</code> —— 派到别的机器那个命令就挂不了账，只能事后再挂（写法见下一节）</li><li><b><code>stopReason=lost</code> 先别动</b>：原 agent 可能仍在跑，<code>unverifiable</code> 既不授权发信也不授权重试；处置顺序见岔路一</li></ul>
+<h2 id="s17-参数取值-全文档唯一一份-会随版本变-引用前-orca-orchestration-worker-start-help-重验">参数取值（全文档唯一一份；会随版本变，引用前 <code>orca orchestration worker-start --help</code> 重验）</h2>
+<p>用法行原文（节选）：</p>
+<pre data-lang="text"><code>(--task &lt;task_id&gt; | --spec &lt;text&gt; | --spec-file &lt;path|-&gt;) [--keep-open] [--on &lt;saved-environment&gt;]
+[--worktree &lt;current|selector|new-child|new-top-level&gt;] (--agent &lt;agent&gt; | --terminal &lt;handle&gt;) …</code></pre>
+<div class="tw"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">取值 / 原文依据</th></tr></thead><tbody><tr><td style="text-align:left"><code>--environment &lt;selector&gt;</code></td><td style="text-align:left"><b>这条命令连哪个 Orca</b>：<code>local</code>，或已配对 server 的 id / name。原文 <code>--environment local pins it here.</code>；<code>Without --on a start never picks a server: it runs on the Orca this command reaches.</code></td></tr><tr><td style="text-align:left"><code>--on &lt;saved-environment&gt;</code></td><td style="text-align:left"><b>只选 worker 落在哪个 server</b>：<code>--on selects only the worker server; the Run and this command remain on the current Orca server.</code> → 与 <code>--environment</code> 是<b>两个维度</b>，可以同时给；它不保证文件可达（口径 5）</td></tr><tr><td style="text-align:left"><code>--worktree</code></td><td style="text-align:left"><code>current</code> / <code>selector</code> / <code>new-child</code> / <code>new-top-level</code>；selector 形如 <code>name:&lt;x&gt;</code> / <code>path:&lt;x&gt;</code> / <code>id:&lt;repo-id&gt;::&lt;path&gt;</code> / <code>folder:&lt;id&gt;</code> / <code>branch:&lt;x&gt;</code> / <code>issue:&lt;n&gt;</code> / <code>identity:&lt;…&gt;</code> / <code>active</code>（= <code>current</code>）</td></tr><tr><td style="text-align:left"><code>--agent</code> / <code>--terminal</code></td><td style="text-align:left"><b>二选一</b>（用法行 `(--agent <agent> \</td><td style="text-align:left">--terminal <handle>)<code>）。</code>--agent<code> 是 </code>such as<code> 开放列举（口径 4）；</code>--terminal<code> 复用已发出的终端 handle，此时**不给 </code>--worktree<code>**（原文 </code>When reusing --terminal, omit --worktree to start in that terminal's own workspace<code>）。读产出不受承载形态影响，一律 </code>worker-read --source auto`</td></tr><tr><td style="text-align:left"><code>--model</code> + <code>--effort</code></td><td style="text-align:left"><code>--model provider/id</code>；<code>--effort</code> 必须配 <code>--model</code>，取 <code>off / minimal / low / medium / high / xhigh / max</code>（pi 映射到它的 thinking level）；<code>--model</code>、<code>--effort</code> 都不能与 <code>--terminal</code> 同用</td></tr><tr><td style="text-align:left"><code>--item &lt;n&gt;</code></td><td style="text-align:left">与 <code>--on</code> 互斥（硬限制 2）；派到别的机器就事后再挂：<code>orca bot item link &lt;n&gt; dispatch:&lt;id&gt;</code>（<code>item comment</code> 只写字，不算挂账）</td></tr><tr><td style="text-align:left"><code>--retry-of &lt;dispatch_id&gt;</code></td><td style="text-align:left">必须配 <code>--task &lt;失败的那个&gt;</code>（原文 <code>--retry-of needs --task naming the failed Task</code>）；<code>--spec</code> 会新建 Task、位置不继承，处置在岔路一</td></tr><tr><td style="text-align:left"><code>--keep-open</code></td><td style="text-align:left">默认干完自己关：<code>Finished workers close on their own unless started with --keep-open</code>；新建工作区那两种还要看回执里的 <code>keepOpenByDefault</code></td></tr><tr><td style="text-align:left">创建类参数</td><td style="text-align:left"><code>--name</code> / <code>--repo</code> / <code>--base-branch</code> / <code>--display-name</code> / <code>--comment</code> / <code>--setup</code>：原文 <code>Creation flags (…) are rejected for current/existing worktrees.</code> 只对 <code>new-child</code> / <code>new-top-level</code> 用（见主路第 4 步）</td></tr></tbody></table></div>
+<hr>
+<h1 id="s18-命令面-orca-1-4-278-实测-orca-orchestration-31-个子命令">命令面（Orca 1.4.278 实测：<code>orca orchestration</code> 31 个子命令）</h1>
+<p>前面的章节讲<b>概念与判断</b>；这一节讲<b>你手边到底有哪些命令</b>。不常用的命令不必背，但要知道它存在——否则会绕着弯做事。</p>
+<h2 id="s19-你日常用的-十个">你日常用的（十个）</h2>
+<div class="tw"><table><thead><tr><th style="text-align:left">命令</th><th style="text-align:left">干什么</th></tr></thead><tbody><tr><td style="text-align:left"><code>worker-start</code></td><td style="text-align:left">派一次活（参数在上一节）</td></tr><tr><td style="text-align:left"><code>worker-show</code></td><td style="text-align:left">看一个 dispatch 的状态；<b>加 <code>--full</code> 才有 <code>observation</code></b></td></tr><tr><td style="text-align:left"><code>worker-read</code></td><td style="text-align:left">读它的产出（<code>--source auto</code> 最常用）</td></tr><tr><td style="text-align:left"><code>worker-list</code></td><td style="text-align:left">列你的 worker</td></tr><tr><td style="text-align:left"><code>worker-stop</code> / <code>worker-abandon</code> / <code>worker-release</code></td><td style="text-align:left">三种收场，见岔路一那张表</td></tr><tr><td style="text-align:left"><code>reply</code></td><td style="text-align:left">回答 worker 的问题（<code>--id &lt;msg_id&gt; --body &lt;text&gt;</code>）</td></tr><tr><td style="text-align:left"><code>send</code></td><td style="text-align:left">给 worker / 别的 bot / Run 发信（类型见下）</td></tr><tr><td style="text-align:left"><code>inbox</code> / <code>check</code></td><td style="text-align:left">看收件箱；<code>check</code> 是消费式的（读过的批次会被标记，下次只给新的）</td></tr></tbody></table></div>
+<h2 id="s20-容易漏掉的-存在但常被忘记">容易漏掉的（存在但常被忘记）</h2>
+<div class="tw"><table><thead><tr><th style="text-align:left">命令</th><th style="text-align:left">什么时候用</th></tr></thead><tbody><tr><td style="text-align:left"><code>worker-keep-open</code></td><td style="text-align:left">不想让它干完就关（取消自动释放的那个例外）；<code>worker-release</code> 可手动清掉这个例外</td></tr><tr><td style="text-align:left"><code>deny</code></td><td style="text-align:left">拒掉 worker 的权限请求，<b>它带着理由继续跑</b>（不是杀它）</td></tr><tr><td style="text-align:left"><code>task-create</code> / <code>task-list</code> / <code>task-update</code></td><td style="text-align:left">自己建任务、看状态、改状态（含「取消」那套）</td></tr><tr><td style="text-align:left"><code>dispatch</code></td><td style="text-align:left">把一个 Task 派到<b>已有终端</b>（与 <code>worker-start</code> 新建不同）；<code>--dry-run</code> 可以先看 preamble</td></tr><tr><td style="text-align:left"><code>dispatch-show</code> / <code>request-show</code></td><td style="text-align:left">查 dispatch 上下文；<b>不确定上一次改动有没有生效</b>时用 <code>request-show</code>（只读，安全）</td></tr><tr><td style="text-align:left"><code>gate-create</code> / <code>gate-resolve</code> / <code>gate-list</code></td><td style="text-align:left"><b>决策门</b>：把一个 Task 卡在“等人拍板”上。比在聊天里问一句更结构化</td></tr><tr><td style="text-align:left"><code>run-create</code> / <code>run-use</code> / <code>run-current</code> / <code>run-list</code> / <code>run-show</code></td><td style="text-align:left">管 Run（命名空间 + 收件箱）</td></tr><tr><td style="text-align:left"><code>reset</code></td><td style="text-align:left">清 orchestration 状态（<code>--all</code> / <code>--tasks</code> / <code>--messages</code>），破坏性，少用</td></tr></tbody></table></div>
+<h2 id="s21-send-type-有九种-不是三种"><code>send --type</code> 有九种（不是三种）</h2>
+<p>原文：<code>Valid --type values: status, dispatch, worker_done, merge_ready, escalation, handoff, decision_gate, question, heartbeat.</code></p>
+<div class="tw"><table><thead><tr><th style="text-align:left">类型</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td style="text-align:left"><code>handoff</code></td><td style="text-align:left">连责任一起交出去（对别的 bot 用这个）</td></tr><tr><td style="text-align:left"><code>question</code></td><td style="text-align:left">只请教，自己仍负责收尾</td></tr><tr><td style="text-align:left"><code>status</code></td><td style="text-align:left">只同步，不转移责任</td></tr><tr><td style="text-align:left"><code>worker_done</code></td><td style="text-align:left">worker 报告完成，**必须带 `--outcome succeeded\</td><td style="text-align:left">failed`**</td></tr><tr><td style="text-align:left"><code>escalation</code></td><td style="text-align:left">升级：卡住 / 要授权 / 失联</td></tr><tr><td style="text-align:left"><code>merge_ready</code></td><td style="text-align:left">分支可合了</td></tr><tr><td style="text-align:left"><code>decision_gate</code></td><td style="text-align:left">需人拍板</td></tr><tr><td style="text-align:left"><code>dispatch</code></td><td style="text-align:left">派发通知</td></tr><tr><td style="text-align:left"><code>heartbeat</code></td><td style="text-align:left">心眺</td></tr></tbody></table></div>
+<p>两个坑：<code>worker_done</code> 和 <code>heartbeat</code> 是<b>精确到 Dispatch</b> 的信号，不能发给群组；不传 <code>--to</code> 就用该 Dispatch 的 Run 收件箱。</p>
+<h2 id="s22-两个容易误会的-scope">两个容易误会的 scope</h2>
+<ul><li><b><code>worker-list</code> 默认只看当前绑定的 Run</b>（原文 <code>Without --run the list is scoped to the Run bound to the calling terminal</code>），最多 100 条。所以「我只有 12 个 worker」很可能只是这个 Run 里 12 个。</li><li><b><code>inbox</code> 不传 <code>--terminal</code> / <code>--run</code> 就是整台 Orca 的全部邮箱</b>，范围大得多。</li></ul>
+<h2 id="s23-两个已退役的命令">两个已退役的命令</h2>
+<p><code>coordinator-start</code> / <code>coordinator-stop</code> <b>不再有副作用</b>，调用只会返回一句提示（“改用 Run / Task / worker-start 那套基元”）。看到别人（或旧文档）叫你用它们，直接跳过。</p>
+<hr>
+<h1 id="s24-维护">维护</h1>
+<p>改<b>任意一份</b>后固定做三步：</p>
+<ol><li><b>全局搜旧说法</b>：改了什么词，<code>grep</code> 整个文件确认别处没有旧说法</li><li><b>数一遍数量词</b>：标题写「四条 / 两种 / 9 个」，对着内容数一遍</li><li><b>改一处就同步全部</b>。权威清单就是这一句，别处一律引用它、不要各自枚举： <b><code>orca-map.md</code> / <code>orca-panorama.html</code> / <code>orca-workflow.html</code> / <code>QUIZ.md</code> / <code>README.md</code> / <code>skills/orca-map</code> / <code>skills/dispatch-worker</code>（外加 <code>MEMORY.md</code> 里对应的那一行）</b></li></ol>
+<p>这三条不是形式——前两轮自查 13 处错里 6 处源于漏做（一处改了别处没改、标题「看这四条」实际 6 行），第三次是同步清单本身被抄漏。</p>
+<p>机械检查（也只有这一份，在 <code>~/.orca/docs/orca-map</code> 下跑，两份 HTML 都要过）：</p>
+<pre data-lang="bash"><code>for f in orca-panorama.html orca-workflow.html; do python -c "
+import re,sys
+s=open(sys.argv[1],encoding='utf-8').read()
+bad=[(t,len(re.findall(r'&lt;%s[ &gt;]'%t,s)),s.count('&lt;/%s&gt;'%t)) for t in
+ ['div','table','thead','tbody','tr','p','ul','ol','li','style','span','b','code']
+ if len(re.findall(r'&lt;%s[ &gt;]'%t,s))!=s.count('&lt;/%s&gt;'%t)]
+print('tags',bad or 'OK'); print('var无fallback',len(re.findall(r'var\(--[a-z0-9-]+\)',s))); print('100vh','100vh' in s)
+" $f; done
+grep -n '\*\*' orca-panorama.html orca-workflow.html || echo 'markdown residue: none (OK)'   # 有输出就是 bug</code></pre>
+<p>要求：两份都 <code>tags OK</code> / <code>var无fallback 0</code> / <code>100vh False</code>，且 <code>grep '\*\*'</code> 无输出。</p>
+</div>
+</div>
+</body>
+</html>

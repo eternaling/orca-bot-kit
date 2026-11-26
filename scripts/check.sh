@@ -5,7 +5,7 @@ set -u
 cd "$(dirname "$0")/.." || exit 1
 fail=0
 
-echo "== 1/4 两份 HTML 结构 =="
+echo "== 1/5 两份 HTML 结构 =="
 for f in docs/orca-panorama.html docs/orca-workflow.html; do
   python - "$f" <<'PY'
 import re,sys
@@ -23,7 +23,7 @@ PY
   [ $? -ne 0 ] && fail=1
 done
 
-echo "== 2/4 QUIZ 数量自洽 =="
+echo "== 2/5 QUIZ 数量自洽 =="
 python - <<'PY'
 import re,sys
 s=open('docs/QUIZ.md',encoding='utf-8').read()
@@ -39,14 +39,14 @@ sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
 
-echo "== 3/4 文档里不该有 Markdown 星号（HTML 会原样显示） =="
+echo "== 3/5 文档里不该有 Markdown 星号（HTML 会原样显示） =="
 if grep -n '\*\*[^*<]\{1,25\}\*\*' docs/*.html >/dev/null 2>&1; then
   echo "  HTML 里有 ** 残留 -> 失败"; fail=1
 else
   echo "  OK"
 fi
 
-echo "== 4/4 版本一致性（VERSION 与 CHANGELOG 首节） =="
+echo "== 4/5 版本一致性（VERSION 与 CHANGELOG 首节） =="
 python - <<'PY'
 import re,sys
 v=open('VERSION',encoding='utf-8').read().strip()
@@ -58,6 +58,23 @@ print(f"  VERSION={v!r} CHANGELOG首节={top!r} -> {'OK' if ok else '不一致�
 sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
+
+echo "== 5/5 生成物与示意图 =="
+# 内容型 HTML 必须与 md 完全同步（真漂移检测：重新生成一遍比对）
+if command -v node >/dev/null 2>&1; then
+  node scripts/build-html.js --check
+  [ $? -ne 0 ] && { echo "  ✗ orca-map.html 与 md 不同步（跑 node scripts/build-html.js）"; fail=1; }
+else
+  echo "  ⚠ 没装 node，跳过生成物校验"
+fi
+# 两份手工示意图必须带「可能落后」的声明，否则会被误当成权威内容
+for f in docs/orca-panorama.html docs/orca-workflow.html; do
+  if grep -q "手工绘制的结构示意图" "$f"; then
+    echo "  ✓ $f 已声明是示意图"
+  else
+    echo "  ✗ $f 缺「手工示意图」声明（会被误当权威内容）"; fail=1
+  fi
+done
 
 echo
 if [ $fail -eq 0 ]; then echo "全部通过 ✓"; else echo "有失败项 ✗"; fi

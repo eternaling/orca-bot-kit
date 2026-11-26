@@ -8,7 +8,7 @@
 
 ## 你要做的事
 
-1. **要知道 Orca 的结构** → 读 `docs/orca-map.md`。它是**唯一事实来源**；两份 HTML 是它的渲染副本，冲突时信 md。
+1. **要知道 Orca 的结构** → 读 `docs/orca-map.md`。它是**唯一事实来源**；`docs/orca-map.html` 是它自动生成的完整网页（必然同步），两份示意图（panorama / workflow）只表结构关系、**可能落后**。冲突时一律信 md。
 2. **要派 worker / 盯 worker / 验收** → 读 `skills/dispatch-worker/SKILL.md`（动作清单），细节去 md 的「三条岔路」。
 3. **要确认自己学会了** → 答 `docs/QUIZ.md`（23 题），判据在 `templates/self-test-key.md`。先答再看。
 4. **要改这里的任何说法** → 先读 `README.md` 的「维护」一节，按那三步做，再跑 `./scripts/check.sh`。
@@ -30,6 +30,7 @@
 | 参数取值（`--worktree` / `--on` / `--item` / `--terminal` …） | `docs/orca-map.md`「参数取值」一节 |
 | 动手派活的步骤 | `skills/dispatch-worker/SKILL.md` |
 | 自测题 | `docs/QUIZ.md` |
+| 想在网上或浏览器里看完整内容 | `docs/orca-map.html`（自动生成） |
 | 为什么是现在这个说法 | `docs/reviews/` 与 `CHANGELOG.md` |
 | 下一步要改什么 | `ROADMAP.md` |
 | 判据会不会已过期 | 跑 `./scripts/drift.sh` |

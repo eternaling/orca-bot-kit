@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.2.1`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.3.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -81,13 +81,18 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 ---
 
-## 内容三份，怎么分工
+## 内容分成四份，各自定位不同
 
 | 位置 | 放什么 | 权威性 |
 |---|---|---|
-| `docs/orca-map.md` | **唯一事实来源**：四组全景 + 术语表 + 主路 8 步 + 三条岔路 + 8 条已核口径 + 三条硬限制 + 参数取值 | 冲突时信它 |
-| `docs/orca-panorama.html` / `docs/orca-workflow.html` | 同一内容的两张图，自包含、无外部依赖，浏览器直接开 | md 的手工渲染副本 |
+| `docs/orca-map.md` | **唯一事实来源**：四组全景 + 术语表 + 主路 8 步 + 三条岔路 + 8 条已核口径 + 三条硬限制 + 参数取值 + 命令面 | 冲突时信它 |
+| `docs/orca-map.html` | **由 md 自动生成**的完整网页（`node scripts/build-html.js`），带版本号与 md 指纹 | 与 md 必然同步，`check.sh` 保证 |
+| `docs/orca-panorama.html` / `docs/orca-workflow.html` | 两张**手工绘制**的结构示意图 | 仅表结构关系，**可能落后**，措辞以 md 为准 |
 | `docs/QUIZ.md` | 23 道自测题 + 答案 | 考题 |
+
+**为什么不再手抄 HTML**：以前两份 HTML 是 md 的手工副本，`check.sh` 只能查标签结构，
+**抓不住内容漏抄**——改 md 忘了同步某句，没人会发现。现在内容型网页改成生成，
+`check.sh` 会重新生成一遍逐字比对，不同步直接失败。示意图保留但明确声明“可能落后”，只负责表达结构关系。
 
 两个技能是**索引不是正文**：
 - `skills/orca-map` —— 文件在哪、8 条口径的主题、什么时候读什么
@@ -147,17 +152,25 @@ cp templates/self-test-key.md "$BOT/memory/"
 1. **全局搜旧说法** —— 改了什么词，`grep` 整个仓库确认别处没有旧说法
 2. **数一遍数量词** —— 标题写「四条 / 两种 / 9 个」，对着内容数一遍
 3. **改一处就同步全部** —— 同步清单就是这一句，别处一律引用它、不要各自枚举：
-   **`docs/orca-map.md` / `docs/orca-panorama.html` / `docs/orca-workflow.html` / `docs/QUIZ.md` / `README.md`（根目录那份） / `skills/orca-map/SKILL.md` / `skills/dispatch-worker/SKILL.md`**
+   **`docs/orca-map.md` / `docs/QUIZ.md` / `README.md`（根目录那份） / `skills/orca-map/SKILL.md` / `skills/dispatch-worker/SKILL.md`**
+
+两类 HTML **不在手改清单里**：
+- `docs/orca-map.html` —— 由 `node scripts/build-html.js` 从 md 生成，**不要手改**；改完 md 跑一次生成器即可
+- `docs/orca-panorama.html` / `orca-workflow.html` —— 手工示意图，只在结构关系变了才动；它们带着「可能落后」声明，不承担事实准确性的责任
 
 这三条不是形式。历史自查 13 处错里 6 处源于漏做前两步，第 7 处是同步清单本身被抄漏。
 
-跑机械检查（两份 HTML 都要过）：
+跑机械检查：
 
 ```bash
-./scripts/check.sh
+./scripts/check.sh     # 5 项：HTML 结构 / QUIZ 题数 / 星号残留 / 版本一致 / 生成物同步
+./scripts/drift.sh      # 外部：当前 Orca 的 CLI 原文是否还对得上
 ```
 
-要求：`tags OK` / `var无fallback 0` / `100vh False` / 无 Markdown 星号残留，并且 `QUIZ.md` 的标题数字 = 题区编号项数 = 答案区编号项数。
+`check.sh` 的五项里，**第 5 项会重新生成一遍 `orca-map.html` 逐字比对** —— md 改了忘生成，它会直接失败。
+这是「内容漏抄」这类错唯一可靠的防法。
+
+改完提交时请在 `CHANGELOG.md` 记一行：**改了什么说法、为什么**。
 
 改完提交时请在 `CHANGELOG.md` 记一行：**改了什么说法、为什么**。
 
@@ -176,6 +189,7 @@ orca-bot-kit/
 ├── LICENSE                    ← MIT
 ├── docs/
 │   ├── orca-map.md            ← 唯一事实来源
+│   ├── orca-map.html          ← 由 md 自动生成（勿手改）
 │   ├── orca-panorama.html     ← 全景图
 │   ├── orca-workflow.html     ← 流转图
 │   ├── QUIZ.md                ← 23 题 + 答案
@@ -188,7 +202,8 @@ orca-bot-kit/
 │   └── self-test-key.md       ← 自测判据（别放进技能文件）
 └── scripts/
     ├── install.ps1            ← 装进某个 bot
-    ├── check.sh               ← 机械检查（仓库自洽）
+    ├── build-html.js          ← 由 md 生成 orca-map.html（零依赖）
+    ├── check.sh               ← 机械检查（仓库自洽 + 生成物同步）
     ├── drift.sh               ← Orca 版本漂移监测（外部 CLI 是否变了）
     └── drift-checks.txt       ← 那 21 条关键 CLI 原文清单
 ```
