@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Orca 全景（四组概念 + 一条调度链 + 术语表 + 已核口径表）</title>
+<style>
+  body{margin:0;padding:22px 24px 26px;font-family:var(--font-sans,system-ui,-apple-system,"Segoe UI",sans-serif);
+       background:var(--background,#fff);color:var(--foreground,#171717);font-size:13px;line-height:1.55}
+  .wrap{max-width:1020px;margin:0 auto}
+  h1{font-size:18px;margin:0 0 4px}
+  .sub{color:var(--muted-foreground,#6b7280);font-size:12.5px;margin:0 0 6px}
+  .fix{font-size:12px;color:var(--muted-foreground,#6b7280);border-left:3px solid var(--chart-3,#d97706);padding:6px 0 6px 10px;margin:12px 0 18px;background:var(--muted,#f7f7f9);border-radius:0 6px 6px 0}
+  h2{font-size:12px;margin:0 0 10px;color:var(--muted-foreground,#6b7280);font-weight:600;letter-spacing:.6px}
+  .panel{border:1px solid var(--border,#e3e3e6);border-radius:var(--radius,10px);padding:14px 16px;background:var(--card,#fcfcfd);margin-bottom:14px}
+  .grp{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:start}
+  .gt{font-weight:700;font-size:12.5px;padding-top:2px}
+  .gt .k{display:block;font-weight:400;font-size:11px;color:var(--muted-foreground,#8a8f99);margin-top:2px}
+  .items{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px}
+  .node{border:1px solid var(--border,#e3e3e6);border-radius:8px;padding:8px 10px;background:var(--background,#fff)}
+  .node .n{font-weight:650;font-size:12.5px}
+  .node .d{font-size:11.5px;color:var(--muted-foreground,#6b7280);margin-top:2px}
+  .node .m{font-family:var(--font-mono,ui-monospace,monospace);font-size:10.5px;color:var(--muted-foreground,#6b7280);margin-top:3px;word-break:break-all}
+  .c1{border-top:3px solid var(--chart-1,#2563eb)}
+  .c2{border-top:3px solid var(--chart-2,#059669)}
+  .c3{border-top:3px solid var(--chart-3,#d97706)}
+  .c4{border-top:3px solid var(--chart-4,#7c3aed)}
+  .chain{display:flex;flex-wrap:wrap;align-items:center;gap:7px;font-size:12.5px}
+  .bx{border:1px solid var(--border,#dcdce0);border-radius:7px;padding:5px 9px;background:var(--background,#fff);font-weight:600}
+  .bx small{display:block;font-weight:400;font-size:10.5px;color:var(--muted-foreground,#6b7280)}
+  .ar{color:var(--muted-foreground,#8a8f99);font-size:13px}
+  .opt{color:var(--muted-foreground,#8a8f99);font-size:11px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--border,#ececf0);vertical-align:top}
+  th{font-size:11.5px;color:var(--muted-foreground,#6b7280);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td.b{font-weight:600;white-space:nowrap}
+  code{font-family:var(--font-mono,ui-monospace,monospace);font-size:11.5px;background:var(--secondary,#eef0f4);color:var(--secondary-foreground,#333);border-radius:4px;padding:0 5px}
+  .tag{font-size:10.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--border,#dcdce0);background:var(--muted,#f4f4f6);color:var(--muted-foreground,#5b6070);white-space:nowrap}
+  .tblwrap{overflow-x:auto}
+  @media (max-width:640px){
+    body{padding:14px 12px 16px}
+    .grp{grid-template-columns:1fr;gap:8px}
+    .items{grid-template-columns:1fr}
+    td.b{white-space:normal}
+    .node .m{overflow-wrap:anywhere}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Orca 全景：四组概念 + 一条调度链 + 术语表 + 已核口径表</h1>
+  <p class="sub">本机 local · Bot 5 个 · 登记项目/文件夹 9 个（含 ~ 家目录）· automation 0 个（2026-11-26 核对，瞬时值；自查：<span style="font-family:var(--font-mono,monospace)">orca bot list</span> / <span style="font-family:var(--font-mono,monospace)">orca repo list</span> / <span style="font-family:var(--font-mono,monospace)">orca automations list</span>）</p>
+  <div class="fix">Bot、Repo、工作区是三类不同的登记对象，谁也不属于谁；本图按职责分组，关系用箭头表示。</div>
+
+  <div class="panel">
+    <h2>① 身份与对话 · 谁在跟你说话</h2>
+    <div class="grp">
+      <div class="gt">Bot <span class="k">长期身份</span></div>
+      <div class="items">
+        <div class="node c1"><div class="n">Bot ×5</div><div class="d">jarvis / local / night / ali / nas，各有 SOUL+记忆+职责</div></div>
+        <div class="node c1"><div class="n">Home Chat</div><div class="d">每个 bot 一个常驻对话，别人派活落这里</div></div>
+        <div class="node c1"><div class="n">子聊天</div><div class="d">隔离另一个话题，不是新建了 bot 或工作区</div></div>
+      </div>
+    </div>
+    <div class="grp" style="margin-top:10px">
+      <div class="gt">bot ↔ bot <span class="k">交接，不是划界</span></div>
+      <div class="items">
+        <div class="node c1"><div class="n">handoff</div><div class="d">连责任一起交出去，对方负责交付和答复</div><div class="m">--type handoff</div></div>
+        <div class="node c1"><div class="n">question</div><div class="d">只请教，自己仍负责收尾</div><div class="m">--type question</div></div>
+        <div class="node c1"><div class="n">status</div><div class="d">只同步背景，不转移责任</div><div class="m">--type status</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>② 协调与调度 · 一条调度链（箭头只表示先后顺序，不是包含关系）</h2>
+    <div class="chain">
+      <span class="bx">Run<small>命名空间 + 收件箱，自己不调度也不挑机器</small></span><span class="ar">→</span>
+      <span class="bx">Task<small>要做的事：pending/ready/dispatched/completed/failed/blocked</small></span><span class="ar">→</span>
+      <span class="bx">Dispatch<small>一次派发记录（ctx_…）</small></span><span class="ar">→</span>
+      <span class="bx">Worker<small>受监督的执行实例，由某个 Agent 启动</small></span>
+    </div>
+    <p style="margin:10px 0 0;font-size:12px;color:var(--muted-foreground,#6b7280)">
+      <span class="tag">注意</span> Worker ≠ Agent：Worker 是<b>执行实例</b>，Agent 是<b>启动它的执行程序</b>（pi / claude / codex / cursor / antigravity / muse / zcode / opencode / opencode2）。所谓「worker 分好几种」，其实是 Agent 类型不同，加上下条说的承载形态不同。
+    </p>
+    <p style="margin:8px 0 0;font-size:12px;color:var(--muted-foreground,#6b7280)">
+      <span class="tag">注意</span> worker <b>至少有两种承载形态</b>：<b>结构化（聊天）承载</b>——不提供普通可交互的 terminal 窗格，在 Orca 里表现为<b>一个聊天窗口</b>（CLI 原话与判据见 ⑥ 第 3 行）；<b>普通 terminal 承载</b>——有可交互终端，也可用 <span style="font-family:var(--font-mono,monospace)">--terminal</span> 直接复用已有终端。准确说法就这一句：结构化承载<b>没有可交互终端窗格</b>。关掉它的承载会让<b>那次 dispatch 失败</b>（实例：<span style="font-family:var(--font-mono,monospace)">lastError="Terminal closed by operator request"</span>）。
+    </p>
+    <p style="margin:8px 0 0;font-size:12px;color:var(--muted-foreground,#6b7280)">
+      <span class="tag">派发参数</span> 选执行程序之后，模型用 <code>--model provider/id</code>，深度用 <code>--effort off/minimal/low/medium/high/xhigh/max</code>（两个都不能与 <code>--terminal</code> 同用）。<b>派到 <code>current</code> 或已有工作区时，不带</b> <code>--name / --repo / --base-branch / --display-name / --comment / --setup</code>——带了会被拒。
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>③ 文件与场地 · 代码到底落在哪个目录</h2>
+    <div class="items">
+      <div class="node c3"><div class="n">Repo</div><div class="d">项目本体，主工作树就在原路径</div><div class="m">D:/night/gitea/night-flow</div></div>
+      <div class="node c3"><div class="n">工作区根目录</div><div class="d">全局设置，新工作区默认建在这里（2026-11-26 从 C 盘改到 D 盘）</div><div class="m">D:\night\orca\workspaces</div></div>
+      <div class="node c3"><div class="n">Git worktree</div><div class="d">独立工作目录；通常检出一个分支，也可处于 detached HEAD</div><div class="m">…/night-flow/wallet-subscription</div></div>
+      <div class="node c3"><div class="n">Folder 工作区</div><div class="d">不是 git 也能开；bot 的家就是这种</div><div class="m">C:\Users\night\.orca\bots\local-bot</div></div>
+    </div>
+    <p style="margin:10px 0 0;font-size:12px;color:var(--muted-foreground,#6b7280)">
+      <span class="tag">注意</span> 「一个分支一个目录」只描述 Git worktree；主工作树留在 repo 原路径，新工作区才在根目录下。worker 也<b>不是必须</b>新建工作区（<code>--worktree</code> 四值与远程限制见 ⑥）。
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>④ 跟踪 · 你只需要看这一层</h2>
+    <div class="items">
+      <div class="node c4"><div class="n">Item 台账</div><div class="d">跨回合跟踪。开着时是这几个状态之一：Planned（还没动）/ In progress（在干）/ Waiting（等外部）/ Needs you（等你决定）——<b>不是一条必须按顺序走的流水线</b></div></div>
+      <div class="node c4"><div class="n">Automation</div><div class="d">按时间或事件触发一次后续；能监听什么取决于 trigger-options（很多要接 GitHub 等连接器）</div></div>
+    </div>
+    <p style="margin:10px 0 0;font-size:12px;color:var(--muted-foreground,#6b7280)">
+      <span class="tag">口径</span> Item 开着时四态<b>并列</b>；Item 和 Automation 都是<b>辅助跟踪手段</b>，不是活着的必经层级，也不是开 worker 的前提。
+    </p>
+    <p style="margin:8px 0 0;font-size:12px;color:var(--muted-foreground,#6b7280)">
+      <span class="tag">用法</span> <b>要等外部（CI / 别人评审 / 到点）→ 建 automation 等待 + 留 Item 记账</b>，不要派一个 worker 在那儿轮流守着。
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>⑤ 术语一句话对照（读图前先扫一眼）</h2>
+    <div class="tblwrap">
+    <table>
+      <thead><tr><th scope="col" style="width:22%">词</th><th scope="col">一句话</th></tr></thead>
+      <tbody>
+      <tr><td class="b">Run</td><td>命名空间 + 收件箱。<b>自己不管调度、不挑机器</b>；不绑 Run 时 worker-start 会自己建一个。</td></tr>
+      <tr><td class="b">Task</td><td>要做的事。状态：pending / ready / dispatched / completed / failed / blocked。</td></tr>
+      <tr><td class="b">Dispatch</td><td>一次派发的记录（<span style="font-family:var(--font-mono,monospace)">ctx_…</span>）。同一个 Task 可以重试多次、有好几个 dispatch。</td></tr>
+      <tr><td class="b">Worker</td><td>受监督的执行实例。按两条轴描述：<b>执行程序（Agent）</b>决定谁来执行，<b>承载形态（结构化聊天 / 普通 terminal）</b>决定怎么查看、交互和处置退出。不是每个 worker 都有可交互终端。</td></tr>
+      <tr><td class="b">Agent</td><td>启动 worker 用的执行程序类型：pi / claude / codex / cursor / antigravity / muse / zcode / opencode / opencode2。这是 <code>such as</code> 引出的<b>开放列举</b>，不是全部种类（见 ⑥）。</td></tr>
+      <tr><td class="b">Worktree</td><td>文件位置。<code>--worktree</code> 四值，其中 <code>current</code> 指当前工作区；四个取值与远程限制见 ⑥。</td></tr>
+      <tr><td class="b">Item</td><td>跨回合台账，给人看的进度和责任；不强制、不等于任务本身。</td></tr>
+      <tr><td class="b">Automation</td><td>到点或遇到事件时启动一次；能听什么取决于 trigger-options（很多要连接器）。</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>⑥ 已核对口径 · 说错就露怯（8 条 + 3 条硬限制）</h2>
+    <div class="tblwrap">
+    <table>
+      <thead><tr><th scope="col" style="width:30%">结论</th><th scope="col">依据 / 别再说成</th></tr></thead>
+      <tbody>
+      <tr><td class="b">Run 不管调度</td><td><code>A Run is a namespace and home inbox. It never schedules or places workers.</code></td></tr>
+      <tr><td class="b">Task 六个状态</td><td><code>pending / ready / dispatched / completed / failed / blocked</code>。注意 <code>worker-show</code> 里的 <code>state</code> 是 <b>Dispatch</b> 的态（<code>ready / succeeded / failed / stopped</code>），不是 Task 六态。</td></tr>
+      <tr><td class="b">不能写「worker 没有终端」</td><td>CLI 原话 <code>Not every worker has a terminal</code> = 没有<b>可交互终端窗格</b>。硬判据是 <code>worker-read --source terminal</code> 被拒（<code>archive_unavailable: … has no terminal output</code>）。结构化承载<b>常见</b>带 <code>structworker_…</code>，但不是通则，别拿字段存在当证据。</td></tr>
+      <tr><td class="b">--agent 是开放列举</td><td>CLI 原文是 <code>such as</code>，<b>非穷尽</b>；<code>pi</code> 不在那句名单里却实际在用。</td></tr>
+      <tr><td class="b">--on 只选 server</td><td>只选 worker 所在的 Orca server（Run 和发起命令仍在当前 server），<b>不保证</b>文件可达。</td></tr>
+      <tr><td class="b">判断有没真读文件</td><td>硬证据是 transcript 原话（<code>worker-read --source transcript</code>）；「引不出只有读过才知道的细节」是<b>降级判据</b>，不能反推「肯定没读」。</td></tr>
+      <tr><td class="b">Item 状态不是流水线</td><td>Planned / In progress / Waiting / Needs you 是并列的开着的状态，不按顺序派生。</td></tr>
+      <tr><td class="b">bot 之间靠交接</td><td><code>handoff</code> 连责任一起交 / <code>question</code> 只请教、自己仍负责 / <code>status</code> 只同步。不按项目划死边界。</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="margin:10px 0 0;font-size:12px;color:var(--muted-foreground,#6b7280)">
+      <b>另外三条硬限制</b>（不计入上面 8 条）：<code>--worktree</code> 四值 <code>current / selector / new-child / new-top-level</code> 且<b>远程不能用 <code>current</code></b>（<code>Remote current is invalid.</code>）；<code>--item</code> 与 <code>--on</code> 互斥（<code>It can't be combined with --on.</code>）；<code>stopReason=lost</code> / liveness <code>unverifiable</code> <b>先别动</b>——原 agent 可能仍在跑，既不授权发信也不授权重试。
+    </p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>派活流转（主路 + 三条岔路）</title>
+<style>
+  body{margin:0;padding:22px 24px 26px;font-family:var(--font-sans,system-ui,-apple-system,"Segoe UI",sans-serif);
+       background:var(--background,#fff);color:var(--foreground,#171717);font-size:13px;line-height:1.55}
+  .wrap{max-width:1020px;margin:0 auto}
+  h1{font-size:18px;margin:0 0 4px}
+  .sub{color:var(--muted-foreground,#6b7280);font-size:12.5px;margin:0 0 6px}
+  .fix{font-size:12px;color:var(--muted-foreground,#6b7280);border-left:3px solid var(--chart-3,#d97706);padding:6px 0 6px 10px;margin:12px 0 18px;background:var(--muted,#f7f7f9);border-radius:0 6px 6px 0}
+  h2{font-size:12px;margin:0 0 12px;color:var(--muted-foreground,#6b7280);font-weight:600;letter-spacing:.6px}
+  .card{border:1px solid var(--border,#e3e3e6);border-radius:var(--radius,10px);padding:16px 18px;background:var(--card,#fcfcfd);margin-bottom:18px}
+  code{font-family:var(--font-mono,ui-monospace,monospace);font-size:11.5px;background:var(--secondary,#eef0f4);color:var(--secondary-foreground,#333);border-radius:4px;padding:0 5px}
+  ol.flow{counter-reset:step;list-style:none;margin:0;padding:0 0 0 6px}
+  ol.flow li{position:relative;padding:0 0 13px 30px}
+  ol.flow li::before{content:"";position:absolute;left:10px;top:6px;bottom:-4px;border-left:2px solid var(--border,#e0e0e5)}
+  ol.flow li:last-child::before{display:none}
+  ol.flow li::after{content:counter(step);counter-increment:step;position:absolute;left:0;top:4px;
+       width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;
+       font-size:10px;font-weight:700;color:var(--chart-1,#2563eb);
+       background:var(--card,#fff);border:2px solid var(--chart-1,#2563eb)}
+  ol.flow li.own::after{border-color:var(--chart-3,#d97706);color:var(--chart-3,#b45309)}
+  ol.flow li.wk::after{border-color:var(--chart-2,#059669);color:var(--chart-2,#047857)}
+  .hdr{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-bottom:1px}
+  .who{font-weight:700;font-size:12.5px}
+  .who.owner{color:var(--chart-3,#b45309)}
+  .who.bot{color:var(--chart-1,#1d4ed8)}
+  .who.worker{color:var(--chart-2,#047857)}
+  .what{font-size:12.5px}
+  .note{font-size:11.5px;color:var(--muted-foreground,#6b7280);margin-top:2px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:11px}
+  .br{border:1px solid var(--border,#e3e3e6);border-radius:9px;padding:11px 12px;background:var(--background,#fff)}
+  .br h3{margin:0 0 5px;font-size:12.5px;display:flex;align-items:center;gap:6px}
+  .br p{margin:0;font-size:12px;color:var(--muted-foreground,#5f6470)}
+  .br .to{font-size:11.5px;margin-top:6px;color:var(--chart-1,#1d4ed8)}
+  .d1{width:8px;height:8px;border-radius:50%;background:var(--chart-2,#059669);display:inline-block}
+  .d2{width:8px;height:8px;border-radius:50%;background:var(--destructive,#b91c1c);display:inline-block}
+  .d3{width:8px;height:8px;border-radius:50%;background:var(--chart-4,#7c3aed);display:inline-block}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--border,#ececf0);vertical-align:top}
+  th{font-size:11.5px;color:var(--muted-foreground,#6b7280);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  td.k{font-weight:600;white-space:nowrap}
+  .tag{font-size:10.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--border,#dcdce0);background:var(--muted,#f4f4f6);color:var(--muted-foreground,#5b6070);white-space:nowrap}
+  .tblwrap{overflow-x:auto}
+  @media (max-width:640px){
+    body{padding:14px 12px 16px}
+    .grid{grid-template-columns:1fr}
+    td.k{white-space:normal}
+    .note,.what{overflow-wrap:anywhere}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>一件活怎么流下去（主路 + 三条岔路）</h1>
+  <p class="sub">橙色=你，蓝色=bot，绿色=worker；除了成功那条主路，失败、能力不符、等你确认三条岔路也画上了</p>
+  <div class="fix">派完就结束回合只是顺利时的一半：worker 可能失败重试、可能卡在等你确认（healthy but waiting for human）、也可能压根没能力碰这份材料。</div>
+
+  <div class="card">
+    <h2>主路</h2>
+    <ol class="flow">
+      <li class="own">
+        <div class="hdr"><span class="who owner">你</span><span class="what">说需求 + 完成标准 + 依赖的本机条件</span></div>
+        <div class="note">要读本机文件、要联网、要某个 CLI 权限，先说；否则 worker 可能「看起来在干，其实碰不到料」。</div>
+      </li>
+      <li>
+        <div class="hdr"><span class="who bot">Bot</span><span class="what">选执行方式：自己干 / 开 worker / 交给另一个 bot</span></div>
+        <div class="note">小而可当场验证 → 自己做；要隔离、要跑久、要并行、要独立评审 → 开 worker。不是硬门槛，看收益是否盖过派发和验收成本。</div>
+      </li>
+      <li>
+        <div class="hdr"><span class="who bot">Bot</span><span class="what">派发前先确认对方够得到料</span><span class="tag">易漏</span></div>
+        <div class="note">目标机上有没有文件、有没有工具、agent 类型在不在、模型行不行。<code>--on</code> 选的是 worker 所在的 Orca server，Run 和发起命令仍在当前 Orca server；它<b>不保证 worker 能读到另一台机器上的目录</b>。</div>
+      </li>
+      <li>
+        <div class="hdr"><span class="who bot">Bot</span><span class="what">写 spec 并派发</span></div>
+        <div class="note"><code>worker-start --repo &lt;项目&gt; --worktree new-child --name &lt;短词&gt; --agent pi --model provider/id --effort high --item &lt;n&gt;</code>；spec 写清范围、不可动的东西、验收证据、交付格式。<b><code>--worktree</code> 是四值</b>：<code>current / selector / new-child / new-top-level</code>，<b>远程不能用 <code>current</code></b>（<code>Remote current is invalid.</code>）。目标是 <code>current</code> 或已有工作区时<b>不带</b> <code>--name/--repo/--base-branch/--display-name/--comment/--setup</code>（会被拒）；<code>--item</code> <b>不能与 <code>--on</code> 同用</b>（<code>It can't be combined with --on.</code>）。<code>--agent</code> 原文是 <code>such as</code> 引出的开放列举（非穷尽），<code>--effort</code> 取 <code>off/minimal/low/medium/high/xhigh/max</code>。</div>
+      </li>
+      <li class="wk">
+        <div class="hdr"><span class="who worker">Worker</span><span class="what">在选定的工作区里干（新建 / 已有 / current 都可能）：改 → 验证 → 报告（不一定都开 PR）</span></div>
+        <div class="note">一个工作区只放一个写手；多人协作要先划清文件所有权。不一定都开 PR。</div>
+      </li>
+      <li>
+        <div class="hdr"><span class="who bot">Bot</span><span class="what">不等轮询：靠 Orca 通知，但要分清四种结局</span></div>
+        <div class="note">成功完成就进第 7 步验收；<b>其余三种</b>（失败、等你回答/授权、能力不符）分别走下面三条岔路，不是一律「等它自己好」。</div>
+      </li>
+      <li>
+        <div class="hdr"><span class="who bot">Bot</span><span class="what">验收：看实际改动 + 测试证据 + 剩余事项</span></div>
+        <div class="note">按风险决定要不要再开一个 reviewer；写的人不该自己给自己判过。<b>验收不过就回到第 4 步改 spec 或派修复</b>，不用重开一件事从头来。</div>
+      </li>
+      <li class="own">
+        <div class="hdr"><span class="who owner">你</span><span class="what">看结论 + 拍板；点头之后才清理场地</span></div>
+        <div class="note">验收通过、且目录不再需要（没有待修复审和外部依赖）才清理；实际动手是 bot 跑 <code>orca worktree rm</code>，你只管点头。</div>
+      </li>
+    </ol>
+    <p style="margin:10px 0 0;padding:9px 11px;border-radius:8px;background:var(--muted,#f4f4f6);font-size:12px;color:var(--muted-foreground,#5f6470)">
+      <b>拿真实的一次举例：</b>读本机两份 HTML → 选执行方式 → 先确认它读得到 → 派发 → 验收 → 清理。我们第一次就是第 3 步没验，白跑三次（一次自称无权限照写、两次承载被关掉）。
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>三条岔路</h2>
+    <div class="grid">
+      <div class="br">
+        <h3><span class="d2"></span>失败 / 卡死</h3>
+        <p>先看 Dispatch 的状态与原因（<code>worker-show</code> 的 <code>state</code> 是 <b>Dispatch</b> 四态 <code>ready / succeeded / failed / stopped</code>，不是 Task 六态），再分开处置：<b><code>stopReason=lost</code> / liveness <code>unverifiable</code> 先别动</b>——原 agent 可能仍在跑，此时<b>既不授权发信也不授权重试</b>，先 <code>worker-show</code> 判断，不确定就报告不确定；<code>state=failed</code> 或 <code>stopReason=exited</code> 才是进程退出已确认，看原因、需要就 <code>worker-stop</code>。<b>重试 ≠ 复制</b>：<code>--retry-of</code> 配 <code>--task &lt;失败的那个&gt;</code>，且<b>不继承位置</b>，<code>--on / --worktree / --agent（--terminal）</code> 四组都要重述。<b>改了 spec，就是新建一个 Task，不算重试</b>（CLI：<code>--spec creates a new one</code>）——那就只有两条路：要么放弃重试链按新 Task 派，要么不动 spec 去重试。三条兜底：换 agent / 换机器 / 自己接手。不盲目重启。</p>
+        <div class="to">→ 回主路第 3–4 步，或直接收口</div>
+      </div>
+      <div class="br">
+        <h3><span class="d3"></span>等你确认 / 要授权</h3>
+        <p>worker 停下等人类回答时是 <b>healthy，不是失败</b>。该回答就回答（<code>orchestration reply</code>），该你拍板就变成 Item 的 Needs you。但别把 <code>waitingOnHuman=unknown</code> 当「在等人」的证据：实测 <code>failed</code> / <code>stopped</code> 的记录也全是 unknown。</p>
+        <div class="to">→ 回答后它继续；否则挂在你身上</div>
+      </div>
+      <div class="br">
+        <h3><span class="d1"></span>能力不符（这次真发生了）</h3>
+        <p>它没读到原文却照样写报告。最硬的证据是 <b>transcript 自述</b>（worker-read 能看到它原话）；「要求它引用只有读过才知道的细节」是降级判据——引不出只说明它没给可验证证据，不能反过来当成“肯定没读”。注意：这<b>不是 Orca 放错机器</b>——出事的 workspace 都是本机 bot home，问题是 worker 自我误判能力后仍然交付。</p>
+        <div class="to">→ 停掉，改派能碰到料的 agent/机器</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>要不要开 worker（不绝对，看这几种情形）</h2>
+    <div class="tblwrap">
+    <table>
+      <thead><tr><th scope="col" style="width:46%">情形</th><th scope="col">怎么选</th></tr></thead>
+      <tbody>
+      <tr><td class="k">查一下、回一句、改一行</td><td>自己做，派发的开销比活大</td></tr>
+      <tr><td class="k">要动项目代码、要跑很久、要隔离</td><td>开 worker（新工作区或已有工作区都行）</td></tr>
+      <tr><td class="k">几件互不相干的事</td><td>并行开，但并发量按当前容量控，不要一次铺满</td></tr>
+      <tr><td class="k">要独立第二意见</td><td>按风险决定开不开 reviewer，不是每次都开</td></tr>
+      <tr><td class="k">要等外部（CI / 别人评审 / 到点）</td><td>建 automation 等待 + 留 Item 记账；能用什么触发看 <code>trigger-options</code></td></tr>
+      <tr><td class="k">整件事该另一个 bot 负责</td><td><code>--type handoff</code> 连责任一起交；只是请教用 <code>question</code>，只同步用 <code>status</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="margin:10px 0 0;font-size:12px;color:var(--muted-foreground,#6b7280)">
+      <span class="tag">口径</span> Item 和 worker 都是<b>按需工具</b>；bot 之间靠 handoff / question / status 交接，不按项目划界。
+    </p>
+  </div>
+</div>
+</body>
+</html>
