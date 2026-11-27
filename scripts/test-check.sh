@@ -29,6 +29,9 @@ if [ "${1:-}" = "--list" ]; then
   echo "  11 negation-v2    「四类不必都凑」"
   echo "  12 key-part2      动判据第二部分的要素（原来无样本覆盖）"
   echo "  13 rename-section 小节标题被改名（覆盖未测分支）"
+  echo "  14 weaken-source   削弱数据源后同步（逐字一致不等于正确）"
+  echo "  15 dup-block       追加第二个标记块（两个事实源）"
+  echo "  16 move-block       标记块挪出指定小节"
   exit 0
 fi
 
@@ -114,7 +117,17 @@ run_case negation-v2     python scripts/mutations/negation-v2.py
 run_case key-part2       python scripts/mutations/key-part2.py
 run_case rename-section  python scripts/mutations/rename-section.py
 
+# 14 削弱数据源（删一类）后同步 —— 「逐字一致」不保证正确性
+run_case weaken-source python scripts/mutations/weaken-source.py
+
+# 15 追加第二个标记块 —— 两个事实源并存
+run_case dup-block python scripts/mutations/dup-block.py
+
+# 16 把标记块挪出指定小节 —— 6a 只看内容、6b 剥掉块后小节为空，都会放过
+run_case move-block python scripts/mutations/move-block.py
+
+
 echo
 echo "通过 $pass / $((pass+failn))"
 if [ $failn -ne 0 ]; then echo "有样本被放行 —— 检查器在该类上退化 ✗"; exit 1; fi
-echo "检查器的十三类坏改动全部被抓到 ✓"
+echo "检查器的十六类坏改动全部被抓到 ✓"

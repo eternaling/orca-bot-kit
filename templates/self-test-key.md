@@ -96,7 +96,7 @@
 
 **先记住这套判据本身**（与 README、QUIZ 同一套，三处不许不一样）：
 
-<!-- grading:begin -->
+<!-- grading:begin · 本块由 standards/grading.md 生成，勿手改；要改先改数据源再跑 scripts/apply-grading.py -->
 每题必须给出**一处可核对的依据**，四类任一即可：
 
 1. **原文片段**：逐字引一段 CLI 原文（如 `It can't be combined with --on.`）
@@ -105,7 +105,9 @@
 4. **枚举值**：把完整取值列出来（如九种 `--type`、Task 六态）
 
 只写结论、四类都没有的，**不算过**；反之只要占一样就不因「没抄引导语」扣分。
-<!-- grading:end -->
+
+（本节之外不再另述判分标准；看到 `grading:begin/end` 标记请勿手改——改 `standards/grading.md` 后跑 `scripts/apply-grading.py`。）
+<!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->
 
 
 - 23 题全对：bot 记住了这套东西，可以放心让它派活

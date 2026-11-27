@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.8.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.9.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -144,7 +144,7 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 **判分标准**（与 QUIZ 前言、判据第二部分同一份；这段由 `standards/grading.md` 生成，改那边再同步）：
 
-<!-- grading:begin -->
+<!-- grading:begin · 本块由 standards/grading.md 生成，勿手改；要改先改数据源再跑 scripts/apply-grading.py -->
 每题必须给出**一处可核对的依据**，四类任一即可：
 
 1. **原文片段**：逐字引一段 CLI 原文（如 `It can't be combined with --on.`）
@@ -153,7 +153,9 @@ cp templates/self-test-key.md "$BOT/memory/"
 4. **枚举值**：把完整取值列出来（如九种 `--type`、Task 六态）
 
 只写结论、四类都没有的，**不算过**；反之只要占一样就不因「没抄引导语」扣分。
-<!-- grading:end -->
+
+（本节之外不再另述判分标准；看到 `grading:begin/end` 标记请勿手改——改 `standards/grading.md` 后跑 `scripts/apply-grading.py`。）
+<!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->
 - 出现「改了 spec 还挂回原 Task」「`--retry-of` 会继承原来的机器」这类答案，直接不及格
 - 23 题全对 = 可以放心让它派活
 

@@ -19,8 +19,8 @@ import sys, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "standards" / "grading.md"
-BEGIN = "<!-- grading:begin -->"
-END = "<!-- grading:end -->"
+BEGIN = "<!-- grading:begin · 本块由 standards/grading.md 生成，勿手改；要改先改数据源再跑 scripts/apply-grading.py -->"
+END = "<!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->"
 TARGETS = ["README.md", "docs/QUIZ.md", "templates/self-test-key.md"]
 
 

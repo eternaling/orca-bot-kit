@@ -41,7 +41,7 @@ part=re.split(r'^# 第二部分', k, flags=re.M)
 na=seq_count(part[0]) if len(part)>1 else -1
 
 # 泄漏比对要排除 grading 标记块：那里面是判分标准的示例原文，不是某道题的答案
-_B="<!-- grading:begin -->"; _E="<!-- grading:end -->"
+_B="<!-- grading:begin · 本块由 standards/grading.md 生成，勿手改；要改先改数据源再跑 scripts/apply-grading.py -->"; _E="<!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->"
 _q=re.sub(re.escape(_B)+r'.*?'+re.escape(_E), '', q, flags=re.S)
 
 # 泄漏检测（三道，每道都能单独抓到一类）
@@ -136,17 +136,63 @@ for f in docs/orca-panorama.html docs/orca-workflow.html; do
 done
 
 echo "== 6/6 判分标准三处一致（逐字比对数据源 + 禁追加裁剪句） =="
-# 6a：三处标记之间必须逐字等于 standards/grading.md
 if command -v python >/dev/null 2>&1; then
+  # 6a-0 数据源自检：四类必须都在。没有这一条，「逐字一致」只保证同步、不保证正确性
+  python - <<'PYD'
+import sys
+s=open('standards/grading.md',encoding='utf-8').read()
+need={'原文片段':'原文片段|逐字原文','能跑的命令':'能跑的命令|能运行的命令','字段名':'字段名|参数名','枚举值':'枚举值'}
+miss=[k for k in need if k not in s]
+if miss:
+    print('  [FAIL] standards/grading.md 缺四类中的:', miss, '（数据源被削弱了）')
+    sys.exit(1)
+print('  数据源四类齐全 -> OK')
+PYD
+  [ $? -ne 0 ] && fail=1
+
+  # 6a 三处标记块必须逐字等于数据源
   python scripts/apply-grading.py --check
   [ $? -ne 0 ] && fail=1
+
+  # 6a-2 结构断言：标记必须各恰好一次，且块必须落在指定小节内
+  python - <<'PYE'
+import sys
+B="<!-- grading:begin · 本块由 standards/grading.md 生成，勿手改；要改先改数据源再跑 scripts/apply-grading.py -->"; E="<!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->"
+# 每个文件里，块必须落在哪个小节区间
+SPEC={
+ 'README.md': ('## 自测', ['## 内容分成','## 版本与迭代']),
+ 'docs/QUIZ.md': ('# 考 bot', ['## 题']),
+ 'templates/self-test-key.md': ('# 第二部分', ['# 第三部分']),
+}
+bad=[]
+for f,(anchor,stops) in SPEC.items():
+    t=open(f,encoding='utf-8').read()
+    nb, ne = t.count(B), t.count(E)
+    if nb!=1 or ne!=1:
+        bad.append(f'{f}: 标记不成对/重复（begin={nb}, end={ne}）'); continue
+    i=t.find(anchor)
+    if i<0:
+        bad.append(f'{f}: 找不到小节标题「{anchor}」'); continue
+    j=len(t)
+    for st in stops:
+        k=t.find(st, i+len(anchor))
+        if k>=0: j=min(j,k)
+    if not (i < t.find(B) < t.find(E) < j):
+        bad.append(f'{f}: 标记块不在「{anchor}」小节内')
+if bad:
+    for b in bad: print('  [FAIL]', b)
+    sys.exit(1)
+print('  三处标记各 1 对且都在指定小节内 -> OK')
+PYE
+  [ $? -ne 0 ] && fail=1
 else
-  echo "  [WARN] 没有 python：这一项没验（不是通过）"
+  echo "  [WARN] 没有 python：6a 这一项没验（不是通过）"
 fi
 # 6b：标记块之外，不得出现「把四类裁剪成少数几类」的追加句
+if command -v python >/dev/null 2>&1; then
 python - <<'PY6'
 import re,sys
-B="<!-- grading:begin -->"; E="<!-- grading:end -->"
+B="<!-- grading:begin · 本块由 standards/grading.md 生成，勿手改；要改先改数据源再跑 scripts/apply-grading.py -->"; E="<!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->"
 
 def strip_block(text):
     i=text.find(B); j=text.find(E)
@@ -199,6 +245,9 @@ print('  标记块外无追加裁剪句 -> OK')
 sys.exit(0)
 PY6
 [ $? -ne 0 ] && fail=1
+else
+  echo "  [WARN] 没有 python：6b 这一项没验（不是通过）"
+fi
 
 echo
 if [ $fail -eq 0 ]; then echo "全部通过 ✓"; else echo "有失败项 ✗"; fi

@@ -26,6 +26,9 @@
 - **不要凭记忆回答 Orca 的结构问题。** 读 md，或者用 `orca ... --help` 现查。
 - **引用 Orca 行为时给出可验的依据**：CLI 原文，或一条能跑的命令。给不出就别断言。
 - **瞬时值一律现查**（bot 个数、项目数、automation 数、工作区根目录）。文档里不存这些数字。
+- **看到 `grading:begin` / `grading:end` 标记不要手改。** 那是判分标准的同步锚点：
+  块由 `standards/grading.md` 生成，改了 `check.sh` 会红。要改标准就改数据源，再跑 `scripts/apply-grading.py`。
+
 - **自测时不许先看答案。** 先答完 23 题再对 `templates/self-test-key.md`；提前看了就失去了自测的意义。
 
 ## 内容地图

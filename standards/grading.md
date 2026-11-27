@@ -6,3 +6,5 @@
 4. **枚举值**：把完整取值列出来（如九种 `--type`、Task 六态）
 
 只写结论、四类都没有的，**不算过**；反之只要占一样就不因「没抄引导语」扣分。
+
+（本节之外不再另述判分标准；看到 `grading:begin/end` 标记请勿手改——改 `standards/grading.md` 后跑 `scripts/apply-grading.py`。）
