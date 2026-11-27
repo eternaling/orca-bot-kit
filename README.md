@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.11.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `2.0.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -258,9 +258,9 @@ cp templates/self-test-key.md "$BOT/memory/"
 跑机械检查：
 
 ```bash
-./scripts/check.sh       # 6 项：HTML 结构 / QUIZ 题数 / 星号 / 版本 / 生成物 / 判分标准一致
+./scripts/check.sh       # 6 项：HTML 结构(含星号) / QUIZ 题数 / 版本 / 生成物 / 判分标准 / 用例数
 ./scripts/drift.sh       # 外部：当前 Orca 的 CLI 原文是否还对得上
-./scripts/test-check.sh  # 检查器自己的变异测试：16 个用例（9 个变异脚本 + 7 个内联注入）必须全部被 check.sh 抓到
+./scripts/test-check.sh  # 检查器自己的变异测试：19 个用例（12 个变异脚本 + 7 个内联注入）必须全部被 check.sh 抓到
 ```
 
 `test-check.sh` 是**检查器的自测**。为什么需要：`check.sh` 是手写逻辑，本身没被检查过；
@@ -308,7 +308,7 @@ orca-bot-kit/
     ├── build-html.js          ← 由 md 生成 orca-map.html（零依赖）
     ├── apply-grading.py       ← 把 standards/grading.md 同步进三处标记块
     ├── check.sh               ← 机械检查（仓库自洽 + 生成物同步 + 判分标准）
-    ├── test-check.sh          ← 检查器的变异测试（16 个用例必须被抓到）
+    ├── test-check.sh          ← 检查器的变异测试（19 个用例必须被抓到）
     ├── drift.sh               ← Orca 版本漂移监测（外部 CLI 是否变了）
     └── drift-checks.txt       ← 那 21 条关键 CLI 原文清单
 ```

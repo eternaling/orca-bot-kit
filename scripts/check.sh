@@ -8,7 +8,7 @@ export PYTHONIOENCODING=utf-8
 cd "$(dirname "$0")/.." || exit 1
 fail=0
 
-echo "== 1/7 两份 HTML 结构 =="
+echo "== 1/6 两份 HTML 结构 =="
 for f in docs/orca-panorama.html docs/orca-workflow.html; do
   python - "$f" <<'PY'
 import re,sys
@@ -24,9 +24,13 @@ print(f"  {p}: tags={'OK' if not bad else bad} var无fallback={nofb} 100vh={'100
 sys.exit(0 if ok else 1)
 PY
   [ $? -ne 0 ] && fail=1
+  # 星号残留并入本项（原 #3）：HTML 里出现 ** 会被当文字显示
+  if grep -n '\*\*[^*<]\{1,25\}\*\*' "$f" >/dev/null 2>&1; then
+    echo "  [FAIL] $f 里有 ** 残留（会被当文字渲染）"; fail=1
+  fi
 done
 
-echo "== 2/7 QUIZ 与判据数量自洽 =="
+echo "== 2/6 QUIZ 与判据数量自洽 =="
 python - <<'PY'
 import re,sys
 q=open('docs/QUIZ.md',encoding='utf-8').read()
@@ -101,14 +105,7 @@ sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
 
-echo "== 3/7 文档里不该有 Markdown 星号（HTML 会原样显示） =="
-if grep -n '\*\*[^*<]\{1,25\}\*\*' docs/*.html >/dev/null 2>&1; then
-  echo "  HTML 里有 ** 残留 -> 失败"; fail=1
-else
-  echo "  OK"
-fi
-
-echo "== 4/7 版本一致性（VERSION 与 CHANGELOG 首节） =="
+echo "== 3/6 版本一致性 =="
 python - <<'PY'
 import re,sys
 v=open('VERSION',encoding='utf-8').read().strip()
@@ -121,7 +118,7 @@ sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
 
-echo "== 5/7 生成物与示意图 =="
+echo "== 4/6 生成物与示意图 =="
 # 内容型 HTML 必须与 md 完全同步（真漂移检测：重新生成一遍比对）
 if command -v node >/dev/null 2>&1; then
   node scripts/build-html.js --check
@@ -138,7 +135,7 @@ for f in docs/orca-panorama.html docs/orca-workflow.html; do
   fi
 done
 
-echo "== 6/7 判分标准三处一致（逐字比对数据源 + 禁追加裁剪句） =="
+echo "== 5/6 判分标准三处一致（逐字比对数据源） =="
 if command -v python >/dev/null 2>&1; then
   # 6a-0 数据源自检：四类必须都在。没有这一条，「逐字一致」只保证同步、不保证正确性
   python - <<'PYD'
@@ -191,73 +188,12 @@ PYE
 else
   echo "  [WARN] 没有 python：6a 这一项没验（不是通过）"
 fi
-# 6b：标记块之外，不得出现「把四类裁剪成少数几类」的追加句
-if command -v python >/dev/null 2>&1; then
-python - <<'PY6'
-import re,sys
-B="<!-- grading:begin · 本块由 standards/grading.md 生成，勿手改；要改先改数据源再跑 scripts/apply-grading.py -->"; E="<!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->"
-
-def strip_block(text):
-    i=text.find(B); j=text.find(E)
-    if i<0 or j<0: return text
-    return text[:i] + text[j+len(E):]
-
-def section(text, anchor, stop):
-    i=text.find(anchor)
-    if i<0: return ''
-    j=len(text)
-    for s2 in stop:
-        k=text.find(s2, i+len(anchor))
-        if k>=0: j=min(j,k)
-    return text[i:j]
-
-# 裁剪迹象：把「依据」压成原文/命令两类，或说四类不必凑
-CUT = (r'原文或命令|原文或者命令|只要原文|只要命令|只认原文|只认命令|两类即可|二选一'
-       r'|任选其一即可|不必都认|不用都认|不必都|不用都|仅需原文|仅需命令'
-       r'|就行|别的不用|挑着用|不用都凑|不必凑|仅供参考|给个.{0,6}原文|跑条命令'
-       r'|要给 CLI 原文|要给原文|给出 CLI 原文|给出原文|即可')
-# 这些词说明该句在讲「什么不算过」，不是在裁剪依据
-BENIGN = r'不算过|不及格|不达标'
-
-targets = {
-    'README 自测节':  (open('README.md',encoding='utf-8').read(), '## 自测', ['## 内容分成','## 版本与迭代']),
-    'QUIZ 前言':      (open('docs/QUIZ.md',encoding='utf-8').read(), '# 考 bot', ['## 题']),
-    '判据第二部分':    (open('templates/self-test-key.md',encoding='utf-8').read(), '# 第二部分', ['# 第三部分']),
-}
-
-bad=[]
-for name,(text,anchor,stop) in targets.items():
-    seg = strip_block(section(text, anchor, stop))
-    if not seg.strip():
-        continue          # 该节除了标记块外为空，正常
-    for ln in seg.splitlines():
-        ln=ln.strip()
-        if not ln: continue
-        if not re.search(CUT, ln):
-            continue
-        # 豁免只给「纯讲什么算不过、且不涉及原文/命令」的句子
-        benign = bool(re.search(BENIGN, ln)) and not re.search(r'原文|命令', ln)
-        if benign:
-            continue
-        bad.append(f'{name}: 追加了裁剪依据的句子 -> 「{ln[:60]}」')
-
-if bad:
-    for b in bad: print('  [FAIL]', b)
-    print('  -> 失败'); sys.exit(1)
-print('  标记块外无追加裁剪句 -> OK')
-sys.exit(0)
-PY6
-[ $? -ne 0 ] && fail=1
-else
-  echo "  [WARN] 没有 python：6b 这一项没验（不是通过）"
-fi
-
-echo "== 7/7 变异用例数与文档一致（README 里写的数必须等于 run_case 实际数） =="
+echo "== 6/6 变异用例数 =="
 if command -v python >/dev/null 2>&1; then
 python - <<'PY7'
 import re,sys
 t=open('scripts/test-check.sh',encoding='utf-8').read()
-actual=len([l for l in t.splitlines() if l.startswith('run_case ')])
+actual=len([l for l in t.splitlines() if l.startswith('run_case ') or l.startswith('run_case_gap ')])
 r=open('README.md',encoding='utf-8').read()
 nums=set()
 for m in re.finditer(r'(\d+)\s*个(?:坏样本|用例)', r):

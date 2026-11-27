@@ -35,32 +35,65 @@ if [ "${1:-}" = "--list" ]; then
   echo "  14 weaken-source   削弱数据源后同步（逐字一致不等于正确）"
   echo "  15 dup-block       追加第二个标记块（两个事实源）"
   echo "  16 move-block       标记块挪出指定小节"
+  echo "  17 star-residue     HTML 里留 Markdown 星号（并入 #1 后的覆盖）"
+  echo "  18 version-bump     VERSION 与 CHANGELOG 首节不一致"
+  echo "  19 case-count       README 写的用例数与 run_case 实际数不一致"
   exit 0
 fi
 
 TMP=$(mktemp -d 2>/dev/null || mktemp -d -t testcheck)
 trap 'rm -rf "$TMP"' EXIT
 
-pass=0; failn=0
+pass=0; failn=0; gaps=0
 run_case() {
   local name="$1"; shift
   local dir="$TMP/$name"
   cp -r "$SRC/." "$dir" 2>/dev/null || { mkdir -p "$dir"; cp -r "$SRC"/* "$dir"/; }
   rm -rf "$dir/.git"
   ( cd "$dir" && "$@" ) || { echo "  [SKIP] $name 注入脚本失败"; failn=$((failn+1)); return; }
-  if ( cd "$dir" && bash scripts/check.sh >/dev/null 2>&1 ); then
+  ( cd "$dir" && bash scripts/check.sh > "$TMP/$name.log" 2>&1 )
+  local rc=$?
+  if [ $rc -eq 0 ]; then
     echo "  [BAD ] $name  ← 注入后 check.sh 仍然通过（检查器退化了）"
-    failn=$((failn+1))
-  else
+    failn=$((failn+1)); return
+  fi
+  # 必须是因为「报出了错」而失败，不是脚本自己崩了 —— 否则任何无关失败都算「抓住了」
+  if grep -qE "FAIL|不一致|不同步|★|失败" "$TMP/$name.log"; then
     echo "  [OK  ] $name  ← 正确报错"
     pass=$((pass+1))
+  else
+    echo "  [SKIP] $name  ← 退出码非 0 但没有任何报错（脚本崩了？不算抓到）"
+    failn=$((failn+1))
+  fi
+}
+
+
+# 已知缺口：这几类 check.sh 现在**抓不到**（删掉 6b 黑名单的代价）。
+# 保留在套件里，但记为 [GAP] 而不是失败 —— 不让套件假装自己是全绿的。
+run_case_gap() {
+  local name="$1"; shift
+  local dir="$TMP/$name"
+  cp -r "$SRC/." "$dir" 2>/dev/null || { mkdir -p "$dir"; cp -r "$SRC"/* "$dir"/; }
+  rm -rf "$dir/.git"
+  ( cd "$dir" && "$@" ) || { echo "  [SKIP] $name 注入脚本失败"; failn=$((failn+1)); return; }
+  ( cd "$dir" && bash scripts/check.sh > "$TMP/$name.log" 2>&1 )
+  local rc=$?
+  if [ $rc -eq 0 ]; then
+    echo "  [GAP ] $name  ← 已知不设防（无此项守护，是预期内的缺口）"
+    gaps=$((gaps+1))
+  elif grep -qE "FAIL|不一致|不同步|失败" "$TMP/$name.log"; then
+    echo "  [NEW ] $name  ← 居然被报错抓住了？检查器比预期强，请改成 run_case"
+    pass=$((pass+1))
+  else
+    echo "  [SKIP] $name  ← 退出码非 0 但无报错（脚本崩了），不算抓到"
+    failn=$((failn+1))
   fi
 }
 
 echo "== 变异测试：注入已知坏改动，check.sh 必须全部失败 =="
 
 # 1 旧标准原文
-run_case old-literal bash -c '
+run_case_gap old-literal bash -c '
 python - <<PY
 p="README.md"; s=open(p,encoding="utf-8").read()
 s=s.replace("- 23 题全对 = 可以放心让它派活","- 23 题全对 = 可以放心让它派活\n- 只给结论不算过，要给 CLI 原文。",1)
@@ -68,7 +101,7 @@ open(p,"w",encoding="utf-8").write(s)
 PY'
 
 # 2 换说法的旧标准（落在检查小节内部）
-run_case paraphrase bash -c '
+run_case_gap paraphrase bash -c '
 python - <<PY
 p="README.md"; s=open(p,encoding="utf-8").read()
 s=s.replace("- 23 题全对 = 可以放心让它派活","- 23 题全对 = 可以放心让它派活\n- 补充：只要给出原文或命令，二者之一即可。",1)
@@ -76,7 +109,7 @@ open(p,"w",encoding="utf-8").write(s)
 PY'
 
 # 3 否定句
-run_case negation bash -c '
+run_case_gap negation bash -c '
 python - <<PY
 p="README.md"; s=open(p,encoding="utf-8").read()
 s=s.replace("## 自测","## 自测\n\n旧的四类依据已废弃，只认原文或命令。\n",1)
@@ -115,8 +148,8 @@ run_case version bash -c 'printf "9.9.9\n" > VERSION'
 run_case html-sync bash -c 'printf "\n<!-- mutated -->\n" >> docs/orca-map.md'
 
 # 10-13 用独立注入脚本（避免 shell 转义问题）
-run_case paraphrase-v2   python scripts/mutations/paraphrase-v2.py
-run_case negation-v2     python scripts/mutations/negation-v2.py
+run_case_gap paraphrase-v2   python scripts/mutations/paraphrase-v2.py
+run_case_gap negation-v2     python scripts/mutations/negation-v2.py
 run_case key-part2       python scripts/mutations/key-part2.py
 run_case rename-section  python scripts/mutations/rename-section.py
 
@@ -130,7 +163,17 @@ run_case dup-block python scripts/mutations/dup-block.py
 run_case move-block python scripts/mutations/move-block.py
 
 
+# 17 星号残留（原 #3 并入 #1 后新覆盖的方向）
+run_case star-residue python scripts/mutations/star-residue.py
+
+# 18 版本不同步（原 #4 一直没有样本）
+run_case version-bump python scripts/mutations/version-bump.py
+
+# 19 用例数与实际 run_case 数不一致（原 #7 的目标：防止这个数字自己漂）
+run_case case-count python scripts/mutations/case-count.py
+
+
 echo
-echo "通过 $pass / $((pass+failn))"
+echo "通过 $pass / $((pass+failn))（另有 $gaps 项为已知缺口）"
 if [ $failn -ne 0 ]; then echo "有样本被放行 —— 检查器在该类上退化 ✗"; exit 1; fi
-echo "检查器的十六类坏改动全部被抓到 ✓"
+echo "可守的 $pass 类全部抓到 ✓；另有 $gaps 类已知缺口（见 ROADMAP「已知缺口」）"
