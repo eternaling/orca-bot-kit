@@ -19,8 +19,8 @@ if [ "${1:-}" = "--list" ]; then
   echo "  1 old-literal     往自测节注入旧标准的原文"
   echo "  2 paraphrase      往自测节注入旧标准的另一种说法（二者之一）"
   echo "  3 negation        「旧的四类已废弃，只认原文或命令」"
-  echo "  4 drop-elements   把自测节的四要素删成一句话"
-  echo "  5 wrong-section   把四要素从自测节搬到别处"
+  echo "  4 drop-elements   标记块里的枚举值被改成随便写"
+  echo "  5 wrong-section   标记块里的字段名被改成看着办"
   echo "  6 quiz-leak       往题目文件塞一条答案正文"
   echo "  7 quiz-header     把标题题数改错"
   echo "  8 version         改 VERSION 不同步 CHANGELOG"
@@ -77,23 +77,11 @@ s=s.replace("## 自测","## 自测\n\n旧的四类依据已废弃，只认原文
 open(p,"w",encoding="utf-8").write(s)
 PY'
 
-# 4 删掉四要素
-run_case drop-elements bash -c '
-python - <<PY
-p="README.md"; s=open(p,encoding="utf-8").read()
-s=s.replace("四类任一即可：逐字原文片段 / 能跑的命令 / 字段名或参数名 / 完整枚举值","结论要对")
-open(p,"w",encoding="utf-8").write(s)
-PY'
+# 4 标记块内的要素被削弱
+run_case drop-elements python scripts/mutations/drop-elements.py
 
-# 5 把四要素搬到别处（自测节内不再有）
-run_case wrong-section bash -c '
-python - <<PY
-p="README.md"; s=open(p,encoding="utf-8").read()
-line="四类任一即可：逐字原文片段 / 能跑的命令 / 字段名或参数名 / 完整枚举值"
-s=s.replace(line,"结论要对",1)
-s=s.rstrip()+"\n\n四类任一即可：逐字原文片段 / 能跑的命令 / 字段名或参数名 / 完整枚举值\n"
-open(p,"w",encoding="utf-8").write(s)
-PY'
+# 5 标记块内的要素被改成空话
+run_case wrong-section python scripts/mutations/wrong-section.py
 
 # 6 题目文件塞答案
 run_case quiz-leak bash -c '

@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.7.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.8.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -142,9 +142,18 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 `docs/QUIZ.md` 共 **23 题**，覆盖四组概念、调度链、主路 8 步、三条岔路、几个必错的参数陷阱。
 
-**判分标准**（与判据文件第二部分同一套，别两处不一样）：
-- 每题要给**一处可核对的依据**，四类任一即可：逐字原文片段 / 能跑的命令 / 字段名或参数名 / 完整枚举值
-- **只写结论、四类都没有的，不算过**——但**不要求逐字抄 CLI 原文标签**（列全枚举值也算依据）
+**判分标准**（与 QUIZ 前言、判据第二部分同一份；这段由 `standards/grading.md` 生成，改那边再同步）：
+
+<!-- grading:begin -->
+每题必须给出**一处可核对的依据**，四类任一即可：
+
+1. **原文片段**：逐字引一段 CLI 原文（如 `It can't be combined with --on.`）
+2. **能跑的命令**：一条能真跑、结果可看的命令（如 `worker-read --dispatch <id> --source terminal`）
+3. **字段名 / 参数名**：具体到字段或参数（如 `observation.agentWait`、`--worktree`）
+4. **枚举值**：把完整取值列出来（如九种 `--type`、Task 六态）
+
+只写结论、四类都没有的，**不算过**；反之只要占一样就不因「没抄引导语」扣分。
+<!-- grading:end -->
 - 出现「改了 spec 还挂回原 Task」「`--retry-of` 会继承原来的机器」这类答案，直接不及格
 - 23 题全对 = 可以放心让它派活
 
@@ -237,7 +246,7 @@ cp templates/self-test-key.md "$BOT/memory/"
 ```bash
 ./scripts/check.sh       # 6 项：HTML 结构 / QUIZ 题数 / 星号 / 版本 / 生成物 / 判分标准一致
 ./scripts/drift.sh       # 外部：当前 Orca 的 CLI 原文是否还对得上
-./scripts/test-check.sh  # 检查器自己的变异测试：9 个坏样本必须全部被 check.sh 抓到
+./scripts/test-check.sh  # 检查器自己的变异测试：13 个坏样本必须全部被 check.sh 抓到
 ```
 
 `test-check.sh` 是**检查器的自测**。为什么需要：`check.sh` 是手写逻辑，本身没被检查过；
@@ -263,6 +272,8 @@ orca-bot-kit/
 ├── CHANGELOG.md               ← 什么时候改了什么说法
 ├── ROADMAP.md                 ← 已知缺口与下一步
 ├── VERSION                    ← 包版本
+├── standards/
+│   └── grading.md             ← 判分标准的唯一事实源（三处由脚本同步）
 ├── orca-baseline.txt          ← 对账时的 Orca 版本（drift.sh 拿它比）
 ├── LICENSE                    ← MIT
 ├── docs/
@@ -281,6 +292,7 @@ orca-bot-kit/
 └── scripts/
     ├── install.ps1            ← 装进某个 bot
     ├── build-html.js          ← 由 md 生成 orca-map.html（零依赖）
+    ├── apply-grading.py       ← 把 standards/grading.md 同步进三处标记块
     ├── check.sh               ← 机械检查（仓库自洽 + 生成物同步 + 判分标准）
     ├── test-check.sh          ← 检查器的变异测试（9 个坏样本必须被抓到）
     ├── drift.sh               ← Orca 版本漂移监测（外部 CLI 是否变了）
