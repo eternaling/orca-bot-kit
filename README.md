@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.5.2`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.5.3`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -47,7 +47,7 @@
 最后告诉我：错了几题、错在哪些、你觉得说明书哪里没讲清。
 ```
 
-**完整版**（推荐，避免它偷工或去编内容）：
+**完整版**（推荐，避免它偷工或去编内容；8 步）：
 
 ```
 有一个仓库是给 Orca bot 用的调优包，请把它装到你身上并做一次自测。
@@ -59,20 +59,23 @@
    T=$(mktemp -d) && git clone --depth 1 https://github.com/eternaling/orca-bot-kit.git "$T/kit"
    若失败，试 gh repo clone eternaling/orca-bot-kit "$T/kit"
 2) 读两个文件：README.md 和 AGENTS.md。看懂它是什么、该放哪里。
-3) 按 README「安装」一节装到你自己身上。**docs/ 和 skills/ 必须一起装**——
+3) **先备份**（覆盖同名文件是破坏性操作）：把你现有的 skills/ 与 docs/orca-map/ 各复制一份到临时目录，
+   装坏了要能退回去。
+4) 按 README「安装」一节装到你自己身上。**docs/ 和 skills/ 必须一起装**——
    只装 skills 不装 docs，技能里那些“去读 md”的引用会全部断链：
    - docs 四份（md / 两个 html / QUIZ.md）→ ~/.orca/docs/orca-map/
      目标目录已有其他文件时：**合并、不要删原有文件**
    - skills/orca-map 与 skills/dispatch-worker → <你的家目录>/skills/
    - templates/self-test-key.md → <你的家目录>/memory/
-4) 装完先 `ls` 验证真的到位，把输出贴给我。
-5) 自测：只读 docs/QUIZ.md 的 23 题（这个文件里现在只有题目，没有答案），
+5) 装完先 `ls` 验证真的到位，把输出贴给我。
+6) 自测：只读 docs/QUIZ.md 的 23 题（这个文件里现在只有题目，没有答案），
    自己把答案写下来。这一轮**不要读 `templates/self-test-key.md`**（仓库里的路径），
    也不要读 `<你的家目录>/memory/self-test-key.md`（装完之后的路径）—— 这两个是同一个文件的不同位置。
-6) 答完再去读判据：仓库里是 templates/self-test-key.md，装完之后是 <你的家目录>/memory/self-test-key.md。
+7) 答完再去读判据：仓库里是 templates/self-test-key.md，装完之后是 <你的家目录>/memory/self-test-key.md。
    第一部分是这 23 题的答案，第二部分是判分口径。
-   逐题判对错。注意判分标准比“答对没答对”更严：**只给结论不算过，要给出 CLI 原文或能跑的命令。**
-7) 回复我四件事：①装成功的路径清单 ②23 题错了几题（含“结论对但没给验法”的）
+   逐题判对错。判分要求每题有**一处可核对的依据**（逐字原文片段 / 能跑的命令 / 字段名或参数名 / 完整枚举值，
+   四者任一）；只有结论、四项都没有的不算过，但不要求逐字抄原文标签。
+8) 回复我四件事：①装成功的路径清单 ②23 题错了几题（含“结论对但没给验法”的）
    ③错题号与错因 ④你认为说明书哪里写得不够清楚（这条最有价值，请认真给）
 
 关于 SOUL.md：如果 README 要求往你的 SOUL.md 加指针，**先征求你 owner 的同意**；

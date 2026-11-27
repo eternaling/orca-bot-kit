@@ -3,7 +3,16 @@
 > **这是判分的答案，不是学习材料。** 要自测就只读 `docs/QUIZ.md` 的题目区，
 > 答完再回来对。提前看了就失去了自测的意义。
 >
-> 判分的标准比「答案对不对」更严：**只给结论不算过，要给出 CLI 原文、或一条能验的命令。**
+> 判分的标准比「答案对不对」更严，但**不是要求逐字拄原文**。
+> 每题答案必须至少含**一处可核对的具体依据**，以下四类任一即可：
+>
+> 1. 逐字原文片段（如 `It can't be combined with --on.`）
+> 2. 一条能真跑的命令（如 `worker-read --dispatch <id> --source terminal`）
+> 3. 具体的字段名或参数名（如 `observation.agentWait`、`--worktree`）
+> 4. 完整的枚举值（如九种 `--type`、Task 六态）
+>
+> **只写结论、四项都没有的，不算过。** 反之，只要四项占一样，就不因为「没抄引导语」而扣分
+> （例：第 22 题把九种 type 全列出来了，即使没写 `Valid --type values:` 这个前缀也算过）。
 
 ---
 
@@ -30,16 +39,25 @@
 
 9. **三种**：`handoff` 连责任一起交出去；`question` 只请教、自己仍负责收尾；`status` 只同步背景、不转移责任。
 
-10. **干别的。** 派完就结束回合，不轮询、不 sleep；Orca 在它完成 / 失败 / 等人类回答时叫醒 bot。
+10. **派完就结束回合，不守着**；但要能区分它的三种去向。判断用 `orca orchestration worker-show --dispatch <id>`：
+    看 `state`（Dispatch 四值 `ready / succeeded / failed / stopped`）与 `stage`；
+    想知道它是**在等人类**而不是在跑，加 `--full` 看 `observation.agentWait`（非空=在等人）。
+    验完就结束回合，不 sleep、不轮询。
 
 11. `pi/claude/codex/cursor/antigravity/muse/zcode/opencode/opencode2` 是 **Agent（执行程序）类型**，不是 worker 的种类。而且 CLI 原文是 `such as` 引出的**开放列举（非穷尽）**——`pi` 就不在那句名单里却实际在用，别把它当全部种类。worker 按两条轴看：**执行程序**和**承载形态**（结构化聊天 / 普通 terminal）。定模型与深度用 `--model provider/id` + `--effort off/minimal/low/medium/high/xhigh/max`。
 
-12. **确认对方够得到料**：机器、文件、工具、agent 类型、模型。跳过它的后果是白跑一轮——本地已有实例：一个 worker 自称在云端、说没设备权限，**其实它就在本机 bot home（不是 Orca 放错机器）**，没读文件就写了报告；另外两个被关掉窗口直接 failed。
+12. **确认对方够得到料**：机器、文件、工具、agent 类型、模型。
+    跳过它会撞到**可复现的具体错误**：① 远程用 `current` → `Remote current is invalid.`；
+    ② 以为 `--on` 能带文件 → 它只选 worker 所在 server，不保证目录可达；
+    ③ worker 没读到料却照写报告（本机实例：一个自称在云端没设备权限，**其实就在本机 bot home**）。
 
 13. **四值：`current` / `selector` / `new-child` / `new-top-level`。远程不能用 `current`**，原文 `Remote current is invalid.`
     ⚠️ 常见错答：「就 current 和 new-child 两种」——漏了 `selector` 和 `new-top-level`。
 
-14. **不能。** 原文 `It can't be combined with --on.` 想既挂 Item 台账又指定 `--on <server>`，得换个写法或者分两次。
+14. **不能。** 原文 `It can't be combined with --on.`
+    想既挂 Item 台账又指定 `--on <server>`，具体做法是**分两次**：先用带 `--on` 的命令派出去，
+    拿到 `dispatchId=ctx_…` 后再 `orca bot item link <n> dispatch:<id>` 挂账。
+    （不要用 `item comment` 代替——它只往台账写一行字，不会把这个 worker 关联进去。）
 
 15. **都不用：先别动。** `stopReason=lost` / liveness `unverifiable` 时原 agent 可能仍在跑，**既不授权发信也不授权重试**；先 `worker-show` 判断，不确定就报告不确定。
     ⚠️ 常见错答：把 lost 当成 failed，直接重试或发信催——它可能还在干活。
