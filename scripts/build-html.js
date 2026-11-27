@@ -23,7 +23,10 @@ const MD = path.join(ROOT, 'docs', 'orca-map.md');
 const OUT = path.join(ROOT, 'docs', 'orca-map.html');
 const VER = path.join(ROOT, 'VERSION');
 
-const md = fs.readFileSync(MD, 'utf8');
+// 统一成 LF 再处理：否则本地工作副本（CRLF）与克隆（LF）会生成不同的 HTML，
+// check.sh 的「重新生成逐字比对」会在克隆里误报不同步。
+const mdRaw = fs.readFileSync(MD, 'utf8');
+const md = mdRaw.replace(/\r\n/g, '\n');
 const version = fs.readFileSync(VER, 'utf8').trim();
 const fingerprint = crypto.createHash('sha256').update(md, 'utf8').digest('hex').slice(0, 8);
 
