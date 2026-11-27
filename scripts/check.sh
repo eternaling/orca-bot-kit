@@ -131,23 +131,26 @@ for f in docs/orca-panorama.html docs/orca-workflow.html; do
   fi
 done
 
-echo "== 6/6 判分标准三处一致（限定到各自小节，四要素齐全） =="
+echo "== 6/6 判分标准三处一致（结构约束） =="
 python - <<'PY6'
 import re,sys
 
-# 四要素：判分标准必须把「依据」限定成这四类。少任何一类 = 只剩原文/命令的旧标准。
-NEED = {
+ELEM = {
     '原文片段': r'原文片段|逐字原文|CLI 原文',
     '能跑的命令': r'能跑的命令|能运行的命令|可运行|能验的命令',
     '字段名': r'字段名|参数名',
     '枚举值': r'枚举值',
 }
-# 明令禁止的旧口径（只认两类 / 二选一）
-BAN = (r'二者之一|两者之一|二选一即可|只认原文或命令|只认原文/命令|仅需原文'
-       r'|只给结论不算过|只答结论不算过|依据哪句 CLI 原文|要给 CLI 原文|只需要原文或命令')
+# 裁剪迹象：任何把「依据」压成少数几类的说法。不依赖「依据」这个词，
+# 因为这些句子往往只说「原文/命令」，不说「依据」。
+CUT2 = (r'原文或命令|原文或者命令|只要原文|只要命令|只认原文|只认命令|两类即可|二选一'
+        r'|任选其一即可|不必都认|不用都认|不必都|不用都|仅需原文|仅需命令'
+        r'|就行|别的不用|挑着用|不用都凑|给个.{0,6}原文|跑条命令'
+        r'|要给 CLI 原文|要给原文|给出 CLI 原文|给出原文')
+# 出现下述词则该句谈的是「怎么算过」，不是在裁剪依据 → 豁免
+BENIGN = r'不算过|不及格|不达标|必读|见下|见文末'
 
 def section(text, anchor, stop):
-    """取 anchor 之后、stop 之前的那一段（找第一个命中的 stop）"""
     i = text.find(anchor)
     if i < 0: return ''
     j = len(text)
@@ -156,27 +159,79 @@ def section(text, anchor, stop):
         if k >= 0: j = min(j, k)
     return text[i:j]
 
+def logical(seg):
+    lines = seg.split('\n'); out=[]; i=0
+    while i < len(lines):
+        cur = lines[i].strip(); i += 1
+        if not cur: continue
+        if cur.endswith(('：',':')):
+            block=[cur]; blanks=0
+            while i < len(lines):
+                nxt = lines[i].strip()
+                if not nxt:
+                    blanks += 1
+                    if blanks > 1: i += 1; break
+                    i += 1; continue
+                blanks = 0
+                if re.match(r'^(\d+\.|[-*])\s', nxt) or nxt.endswith('。'):
+                    block.append(nxt); i += 1
+                    if nxt.endswith('。'): break
+                else: break
+            out.append(' '.join(block))
+        else:
+            for part in re.split(r'[。！？]', cur):
+                if part.strip(): out.append(part.strip())
+    return out
+
 targets = {
-    'README 自测节': (open('README.md',encoding='utf-8').read(), '## 自测', ['## 内容分成', '## 版本与迭代']),
-    'QUIZ 前言':     (open('docs/QUIZ.md',encoding='utf-8').read(), '# 考 bot', ['## 题']),
-    '判据第二部分':   (open('templates/self-test-key.md',encoding='utf-8').read(), '# 第二部分', ['# 第三部分']),
+    'README 自测节':  (open('README.md',encoding='utf-8').read(), '## 自测', ['## 内容分成','## 版本与迭代']),
+    'QUIZ 前言':      (open('docs/QUIZ.md',encoding='utf-8').read(), '# 考 bot', ['## 题']),
+    '判据第二部分':    (open('templates/self-test-key.md',encoding='utf-8').read(), '# 第二部分', ['# 第三部分']),
 }
 
 bad = []
 for name,(text,anchor,stop) in targets.items():
     seg = section(text, anchor, stop)
     if not seg:
-        bad.append(f'{name}: 找不到该小节（标题被改了？）'); continue
-    missing = [k for k,pat in NEED.items() if not re.search(pat, seg)]
-    if missing: bad.append(f'{name}: 缺 {missing}')
-    if re.search(BAN, seg): bad.append(f'{name}: 出现旧口径（{re.search(BAN,seg).group(0)}）')
+        bad.append(f'{name}: 找不到该小节（标题被改名了？）'); continue
+    sents = logical(seg)
+
+    # ① 必须至少有一句把四类列全（正例基准）
+    if not any(all(re.search(pat, sn) for pat in ELEM.values()) for sn in sents):
+        bad.append(f'{name}: 没有任何一句把四类依据列全')
+
+    # ②' 四要素行不得被削弱成「可写可不写」这类空话
+    WEAK = r'可写可不写|可选|不一定|可以不给|随便|随意|非必需|可有可无'
+    for line in seg.splitlines():
+        ln = line.strip()
+        if not ln: continue
+        if not re.search(r'原文片段|能跑的命令|字段名|枚举值', ln): continue
+        if re.search(WEAK, ln):
+            bad.append(f'{name}: 四要素里的"{{"}}'"'"'被削弱 → 「{ln[:70]}」'.replace('"{{"}}'"'"'','要素'))
+        # 要素行冒号后内容太短 = 没给可核对的东西
+        m = re.search(r'[：:]\s*(.*)$', ln)
+        if m and len(m.group(1).strip()) < 8:
+            bad.append(f'{name}: 四要素某行没给具体说明 → 「{ln[:70]}」')
+
+    # ② 不得有裁剪句：**逐行**查，不在合并块上查
+    #    （合并块会同时含有「四类定义」和「裁剪句」，一起判会互相掩护）
+    for line in seg.splitlines():
+        ln = line.strip()
+        if not ln: continue
+        benign_ok = bool(re.search(BENIGN, ln)) and not re.search(r'原文|命令', ln)
+        if re.search(CUT2, ln) and not benign_ok:
+            if all(re.search(pat, ln) for pat in ELEM.values()):
+                continue   # 这一行自己把四类列全了，是正常写法
+            # 只是提到「四类」而没有重新定义要素（如「四类依据任选其一即可」）→ 视为描述既有四类
+            if re.search(r'四类', ln) and not re.search(r'原文或命令|只要原文|只认原文|只认命令|两类即可|不必都|不用都|挑着用|不用都凑', ln):
+                continue
+            bad.append(f'{name}: 出现裁剪四类的句子 → 「{ln[:70]}」')
 
 if bad:
     for b in bad: print('  [FAIL]', b)
-    print('  -> 失败')
-    sys.exit(1)
-print(f'  三处小节各含四要素（{list(NEED)}）且无旧口径 -> OK')
-print('  注：这是一致性检查，不做语义判断；改判分标准后仍需人看一遍 diff。')
+    print('  -> 失败'); sys.exit(1)
+print('  三处：均有列全四类的句子，且无裁剪句 -> OK')
+print('  注：结构检查，不做语义判断；改判分标准后仍需人看一遍 diff。')
 sys.exit(0)
 PY6
 [ $? -ne 0 ] && fail=1

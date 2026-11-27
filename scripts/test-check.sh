@@ -25,6 +25,10 @@ if [ "${1:-}" = "--list" ]; then
   echo "  7 quiz-header     把标题题数改错"
   echo "  8 version         改 VERSION 不同步 CHANGELOG"
   echo "  9 html-sync       改 md 不重新生成 orca-map.html"
+  echo "  10 paraphrase-v2  换说法的裁剪（不含黑名单字眼）"
+  echo "  11 negation-v2    「四类不必都凑」"
+  echo "  12 key-part2      动判据第二部分的要素（原来无样本覆盖）"
+  echo "  13 rename-section 小节标题被改名（覆盖未测分支）"
   exit 0
 fi
 
@@ -116,7 +120,13 @@ run_case version bash -c 'printf "9.9.9\n" > VERSION'
 # 9 md 改了不重新生成
 run_case html-sync bash -c 'printf "\n<!-- mutated -->\n" >> docs/orca-map.md'
 
+# 10-13 用独立注入脚本（避免 shell 转义问题）
+run_case paraphrase-v2   python scripts/mutations/paraphrase-v2.py
+run_case negation-v2     python scripts/mutations/negation-v2.py
+run_case key-part2       python scripts/mutations/key-part2.py
+run_case rename-section  python scripts/mutations/rename-section.py
+
 echo
 echo "通过 $pass / $((pass+failn))"
 if [ $failn -ne 0 ]; then echo "有样本被放行 —— 检查器在该类上退化 ✗"; exit 1; fi
-echo "检查器的九类坏改动全部被抓到 ✓"
+echo "检查器的十三类坏改动全部被抓到 ✓"
