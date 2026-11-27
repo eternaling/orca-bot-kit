@@ -20,8 +20,8 @@ description: >-
 | --- | --- |
 | `orca-map.md` | **唯一事实来源**：四组全景 + 术语表 + 主路 8 步 + 三条岔路 + 8 条已核口径 + 参数取值与硬限制 + 维护段 |
 | `orca-panorama.html` / `orca-workflow.html` | 同一内容的两张浏览图（自包含，无外部依赖）；**冲突时信 md** |
-| `QUIZ.md` | 23 道自测题（**只有题目，没有答案**；判据在 `templates/self-test-key.md`） |
-| `README.md`（与本文件同目录） | 该目录的文件清单与定版信息 |
+| `QUIZ.md` | 23 道自测题（**只有题目，没有答案**）。判据位置随安装而变：仓库里是 `templates/self-test-key.md`，装完后是 `<你的家目录>/memory/self-test-key.md` |
+| `orca-map.md` 本身 | **定版信息以它为准**（不另存目录索引，避免多一份会过期的副本） |
 
 ## 什么时候用
 

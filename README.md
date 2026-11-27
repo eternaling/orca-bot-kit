@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.10.2`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.11.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -63,7 +63,8 @@
    装坏了要能退回去。**不存在的就记作「无」，不要创建空目录。**
 4) 按 README「安装」一节装到你自己身上。**docs/ 和 skills/ 必须一起装**——
    只装 skills 不装 docs，技能里那些“去读 md”的引用会全部断链：
-   - docs 五份（md / 两个 html / QUIZ.md / README.md）→ ~/.orca/docs/orca-map/
+   - docs 四份（md / 两个 html / QUIZ.md）→ ~/.orca/docs/orca-map/
+     （**刻意不装 `docs/README.md`**：它是仓库里的目录索引，装进目标目录就会变成一份没人校验、会静默过期的副本。定版信息以 `orca-map.md` 为准。）
      目标目录已有其他文件时：**合并、不要删原有文件**
    - skills/orca-map 与 skills/dispatch-worker → <你的家目录>/skills/
    - templates/self-test-key.md → <你的家目录>/memory/
@@ -114,7 +115,7 @@
 ```bash
 # 1) 事实源与浏览图 → 本机定版目录
 mkdir -p ~/.orca/docs/orca-map
-cp docs/orca-map.md docs/orca-panorama.html docs/orca-workflow.html docs/QUIZ.md docs/README.md ~/.orca/docs/orca-map/
+cp docs/orca-map.md docs/orca-panorama.html docs/orca-workflow.html docs/QUIZ.md ~/.orca/docs/orca-map/
 
 # 2) 技能 → 你的 bot 家目录（skills/<name>/SKILL.md）
 BOT=~/.orca/bots/<你的 bot 目录>
@@ -155,10 +156,17 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 只写结论、四类都没有的，**不算过**；反之只要占一样就不因「没抄引导语」扣分。
 
-（本节之外不再另述判分标准；看到 `grading:begin/end` 标记请勿手改——改 `standards/grading.md` 后跑 `scripts/apply-grading.py`。）
+**枚举型题必须答全**：判据列出 N 条（如第 12 题的三个错误 + 五项清单、第 17 题的六个状态），
+**缺一即算不过**。只答对一半的，别按「有依据」放过——「有依据」和「依据覆盖全」是两件事。
 
-**留痕要求**：答题人应把答案写到 `<你的家目录>/memory/self-test-answers-YYYYMMDD.md`。
-拿不出这份文件 → 视为未自测（否则无法排除「先看判据再倒着答」）。
+**留痕与污染声明**：
+- 答案写到 `<你的家目录>/memory/self-test-answers-YYYYMMDD.md`，**无留痕视为未自测**。
+- 先答后看靠自觉，机制上只能做到这些：建议**每答 5 题 append 一次**（留下递进的时间序列），
+  判分者在打开判据**之前**先记下答案文件的 mtime。
+- **之前读过判据的（例如装过旧版再重跑），必须在答案文件开头声明污染**，并逐题标注
+  哪些答案来自判据记忆、哪些来自文档；**判分只认后者**。不声明的话，二次回归的分数是虚高的。
+
+（本节之外不再另述判分标准；看到 `grading:begin/end` 标记请勿手改——改 `standards/grading.md` 后跑 `scripts/apply-grading.py`。）
 <!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->
 - 出现「改了 spec 还挂回原 Task」「`--retry-of` 会继承原来的机器」这类答案，直接不及格
 - 23 题全对 = 可以放心让它派活
@@ -175,7 +183,7 @@ cp templates/self-test-key.md "$BOT/memory/"
 | `docs/orca-map.md` | **唯一事实来源**：四组全景 + 术语表 + 主路 8 步 + 三条岔路 + 8 条已核口径 + 三条硬限制 + 参数取值 + 命令面 | 冲突时信它 |
 | `docs/orca-map.html` | **由 md 自动生成**的完整网页（`node scripts/build-html.js`），带版本号与 md 指纹 | 与 md 必然同步，`check.sh` 保证 |
 | `docs/orca-panorama.html` / `docs/orca-workflow.html` | 两张**手工绘制**的结构示意图 | 仅表结构关系，**可能落后**，措辞以 md 为准 |
-| `docs/QUIZ.md` | 23 道自测题 + 答案 | 考题 |
+| `docs/QUIZ.md` | 23 道自测题（**只有题目**） | 考题（判据在 `templates/`） |
 
 **为什么不再手抄 HTML**：以前两份 HTML 是 md 的手工副本，`check.sh` 只能查标签结构，
 **抓不住内容漏抄**——改 md 忘了同步某句，没人会发现。现在内容型网页改成生成，
@@ -252,7 +260,7 @@ cp templates/self-test-key.md "$BOT/memory/"
 ```bash
 ./scripts/check.sh       # 6 项：HTML 结构 / QUIZ 题数 / 星号 / 版本 / 生成物 / 判分标准一致
 ./scripts/drift.sh       # 外部：当前 Orca 的 CLI 原文是否还对得上
-./scripts/test-check.sh  # 检查器自己的变异测试：13 个坏样本必须全部被 check.sh 抓到
+./scripts/test-check.sh  # 检查器自己的变异测试：16 个用例（9 个变异脚本 + 7 个内联注入）必须全部被 check.sh 抓到
 ```
 
 `test-check.sh` 是**检查器的自测**。为什么需要：`check.sh` 是手写逻辑，本身没被检查过；
@@ -260,7 +268,7 @@ cp templates/self-test-key.md "$BOT/memory/"
 就没人会再人工看那几处了。历史上有一次就是这样（v1.5.4 第 6 项）。
 改任何检查逻辑后，先跑它。
 
-`check.sh` 的五项里，**第 5 项会重新生成一遍 `orca-map.html` 逐字比对** —— md 改了忘生成，它会直接失败。
+`check.sh` 的六项里，**第 5 项会重新生成一遍 `orca-map.html` 逐字比对** —— md 改了忘生成，它会直接失败。
 这是「内容漏抄」这类错唯一可靠的防法。
 
 改完提交时请在 `CHANGELOG.md` 记一行：**改了什么说法、为什么**。
@@ -300,7 +308,7 @@ orca-bot-kit/
     ├── build-html.js          ← 由 md 生成 orca-map.html（零依赖）
     ├── apply-grading.py       ← 把 standards/grading.md 同步进三处标记块
     ├── check.sh               ← 机械检查（仓库自洽 + 生成物同步 + 判分标准）
-    ├── test-check.sh          ← 检查器的变异测试（9 个坏样本必须被抓到）
+    ├── test-check.sh          ← 检查器的变异测试（16 个用例必须被抓到）
     ├── drift.sh               ← Orca 版本漂移监测（外部 CLI 是否变了）
     └── drift-checks.txt       ← 那 21 条关键 CLI 原文清单
 ```

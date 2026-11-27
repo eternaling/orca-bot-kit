@@ -27,7 +27,7 @@ if (-not (Test-Path $BotDir)) {
 
 Write-Host "== 1/3 事实源与浏览图 -> $DocsDir" -ForegroundColor Cyan
 New-Item -ItemType Directory -Force -Path $DocsDir | Out-Null
-foreach ($f in @("orca-map.md","orca-panorama.html","orca-workflow.html","QUIZ.md","README.md")) {
+foreach ($f in @("orca-map.md","orca-panorama.html","orca-workflow.html","QUIZ.md")) {
     Copy-Item (Join-Path $Repo "docs\$f") $DocsDir -Force
     Write-Host "   $f"
 }

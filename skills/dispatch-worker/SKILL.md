@@ -113,7 +113,7 @@ orca orchestration worker-start --environment local \
 **题**：一次派发失败了，你想把它**重试到另一台机器**，顺便把 spec 写清楚一点。
 （1）重试还挂在原来那个 Task 上吗？（2）哪些参数必须重新给？（3）如果你坚持要「换机器 + 改好的 spec」，该怎么做？
 
-**判据**在 `memory/self-test-key.md`，别先看。判分不是「引三句原文」，而是**必须给出一条能真跑的命令**并说明回执长什么样。
+**判据**在 `memory/self-test-key.md`，别先看。**本题**的判分要求是必须给出一条能真跑的命令并说明回执长什么样；**总口径**见 `standards/grading.md`（四类依据任一即可），此处不重述。
 
 ---
 

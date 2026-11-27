@@ -8,7 +8,7 @@ export PYTHONIOENCODING=utf-8
 cd "$(dirname "$0")/.." || exit 1
 fail=0
 
-echo "== 1/6 两份 HTML 结构 =="
+echo "== 1/7 两份 HTML 结构 =="
 for f in docs/orca-panorama.html docs/orca-workflow.html; do
   python - "$f" <<'PY'
 import re,sys
@@ -26,7 +26,7 @@ PY
   [ $? -ne 0 ] && fail=1
 done
 
-echo "== 2/6 QUIZ 与判据数量自洽 =="
+echo "== 2/7 QUIZ 与判据数量自洽 =="
 python - <<'PY'
 import re,sys
 q=open('docs/QUIZ.md',encoding='utf-8').read()
@@ -101,14 +101,14 @@ sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
 
-echo "== 3/6 文档里不该有 Markdown 星号（HTML 会原样显示） =="
+echo "== 3/7 文档里不该有 Markdown 星号（HTML 会原样显示） =="
 if grep -n '\*\*[^*<]\{1,25\}\*\*' docs/*.html >/dev/null 2>&1; then
   echo "  HTML 里有 ** 残留 -> 失败"; fail=1
 else
   echo "  OK"
 fi
 
-echo "== 4/6 版本一致性（VERSION 与 CHANGELOG 首节） =="
+echo "== 4/7 版本一致性（VERSION 与 CHANGELOG 首节） =="
 python - <<'PY'
 import re,sys
 v=open('VERSION',encoding='utf-8').read().strip()
@@ -121,7 +121,7 @@ sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
 
-echo "== 5/6 生成物与示意图 =="
+echo "== 5/7 生成物与示意图 =="
 # 内容型 HTML 必须与 md 完全同步（真漂移检测：重新生成一遍比对）
 if command -v node >/dev/null 2>&1; then
   node scripts/build-html.js --check
@@ -138,7 +138,7 @@ for f in docs/orca-panorama.html docs/orca-workflow.html; do
   fi
 done
 
-echo "== 6/6 判分标准三处一致（逐字比对数据源 + 禁追加裁剪句） =="
+echo "== 6/7 判分标准三处一致（逐字比对数据源 + 禁追加裁剪句） =="
 if command -v python >/dev/null 2>&1; then
   # 6a-0 数据源自检：四类必须都在。没有这一条，「逐字一致」只保证同步、不保证正确性
   python - <<'PYD'
@@ -250,6 +250,30 @@ PY6
 [ $? -ne 0 ] && fail=1
 else
   echo "  [WARN] 没有 python：6b 这一项没验（不是通过）"
+fi
+
+echo "== 7/7 变异用例数与文档一致（README 里写的数必须等于 run_case 实际数） =="
+if command -v python >/dev/null 2>&1; then
+python - <<'PY7'
+import re,sys
+t=open('scripts/test-check.sh',encoding='utf-8').read()
+actual=len([l for l in t.splitlines() if l.startswith('run_case ')])
+r=open('README.md',encoding='utf-8').read()
+nums=set()
+for m in re.finditer(r'(\d+)\s*个(?:坏样本|用例)', r):
+    nums.add(int(m.group(1)))
+bad=[n for n in nums if n!=actual]
+if bad:
+    print(f'  [FAIL] README 写的用例数 {sorted(nums)} 与实际 run_case={actual} 不一致')
+    sys.exit(1)
+if not nums:
+    print('  [FAIL] README 里找不到「N 个用例/坏样本」的说法'); sys.exit(1)
+print(f'  用例数一致：{actual} -> OK')
+sys.exit(0)
+PY7
+[ $? -ne 0 ] && fail=1
+else
+  echo "  [WARN] 没有 python：这一项没验（不是通过）"
 fi
 
 echo
