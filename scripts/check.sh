@@ -5,7 +5,7 @@ set -u
 cd "$(dirname "$0")/.." || exit 1
 fail=0
 
-echo "== 1/5 两份 HTML 结构 =="
+echo "== 1/6 两份 HTML 结构 =="
 for f in docs/orca-panorama.html docs/orca-workflow.html; do
   python - "$f" <<'PY'
 import re,sys
@@ -23,7 +23,7 @@ PY
   [ $? -ne 0 ] && fail=1
 done
 
-echo "== 2/5 QUIZ 与判据数量自洽 =="
+echo "== 2/6 QUIZ 与判据数量自洽 =="
 python - <<'PY'
 import re,sys
 q=open('docs/QUIZ.md',encoding='utf-8').read()
@@ -94,14 +94,14 @@ sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
 
-echo "== 3/5 文档里不该有 Markdown 星号（HTML 会原样显示） =="
+echo "== 3/6 文档里不该有 Markdown 星号（HTML 会原样显示） =="
 if grep -n '\*\*[^*<]\{1,25\}\*\*' docs/*.html >/dev/null 2>&1; then
   echo "  HTML 里有 ** 残留 -> 失败"; fail=1
 else
   echo "  OK"
 fi
 
-echo "== 4/5 版本一致性（VERSION 与 CHANGELOG 首节） =="
+echo "== 4/6 版本一致性（VERSION 与 CHANGELOG 首节） =="
 python - <<'PY'
 import re,sys
 v=open('VERSION',encoding='utf-8').read().strip()
@@ -114,7 +114,7 @@ sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
 
-echo "== 5/5 生成物与示意图 =="
+echo "== 5/6 生成物与示意图 =="
 # 内容型 HTML 必须与 md 完全同步（真漂移检测：重新生成一遍比对）
 if command -v node >/dev/null 2>&1; then
   node scripts/build-html.js --check
@@ -130,6 +130,25 @@ for f in docs/orca-panorama.html docs/orca-workflow.html; do
     echo "  ✗ $f 缺「手工示意图」声明（会被误当权威内容）"; fail=1
   fi
 done
+
+echo "== 6/6 判分标准三处一致（README 自测节 / QUIZ / 判据第二部分） =="
+python - <<'PY6'
+import re,sys
+files={'README.md':'README','docs/QUIZ.md':'QUIZ','templates/self-test-key.md':'判据'}
+miss=[];old=[]
+for f,name in files.items():
+    t=open(f,encoding='utf-8').read()
+    if '四类' not in t: miss.append(name)
+    # 旧标准（只剩「原文/命令」两类）不该再出现
+    if re.search(r'依据哪句 CLI 原文|只给结论不算过，要给 CLI 原文|只答结论不算过', t): old.append(name)
+ok = not miss and not old
+print(f"  含「四类」依据定义: {[n for n in files.values() if n not in miss]}")
+if miss: print(f"  [FAIL] 缺四类定义: {miss}")
+if old:  print(f"  [FAIL] 仍有旧判分标准: {old}")
+print(f"  -> {'OK' if ok else '失败'}")
+sys.exit(0 if ok else 1)
+PY6
+[ $? -ne 0 ] && fail=1
 
 echo
 if [ $fail -eq 0 ]; then echo "全部通过 ✓"; else echo "有失败项 ✗"; fi
