@@ -131,22 +131,53 @@ for f in docs/orca-panorama.html docs/orca-workflow.html; do
   fi
 done
 
-echo "== 6/6 判分标准三处一致（README 自测节 / QUIZ / 判据第二部分） =="
+echo "== 6/6 判分标准三处一致（限定到各自小节，四要素齐全） =="
 python - <<'PY6'
 import re,sys
-files={'README.md':'README','docs/QUIZ.md':'QUIZ','templates/self-test-key.md':'判据'}
-miss=[];old=[]
-for f,name in files.items():
-    t=open(f,encoding='utf-8').read()
-    if '四类' not in t: miss.append(name)
-    # 旧标准（只剩「原文/命令」两类）不该再出现
-    if re.search(r'依据哪句 CLI 原文|只给结论不算过，要给 CLI 原文|只答结论不算过', t): old.append(name)
-ok = not miss and not old
-print(f"  含「四类」依据定义: {[n for n in files.values() if n not in miss]}")
-if miss: print(f"  [FAIL] 缺四类定义: {miss}")
-if old:  print(f"  [FAIL] 仍有旧判分标准: {old}")
-print(f"  -> {'OK' if ok else '失败'}")
-sys.exit(0 if ok else 1)
+
+# 四要素：判分标准必须把「依据」限定成这四类。少任何一类 = 只剩原文/命令的旧标准。
+NEED = {
+    '原文片段': r'原文片段|逐字原文|CLI 原文',
+    '能跑的命令': r'能跑的命令|能运行的命令|可运行|能验的命令',
+    '字段名': r'字段名|参数名',
+    '枚举值': r'枚举值',
+}
+# 明令禁止的旧口径（只认两类 / 二选一）
+BAN = (r'二者之一|两者之一|二选一即可|只认原文或命令|只认原文/命令|仅需原文'
+       r'|只给结论不算过|只答结论不算过|依据哪句 CLI 原文|要给 CLI 原文|只需要原文或命令')
+
+def section(text, anchor, stop):
+    """取 anchor 之后、stop 之前的那一段（找第一个命中的 stop）"""
+    i = text.find(anchor)
+    if i < 0: return ''
+    j = len(text)
+    for s2 in stop:
+        k = text.find(s2, i+len(anchor))
+        if k >= 0: j = min(j, k)
+    return text[i:j]
+
+targets = {
+    'README 自测节': (open('README.md',encoding='utf-8').read(), '## 自测', ['## 内容分成', '## 版本与迭代']),
+    'QUIZ 前言':     (open('docs/QUIZ.md',encoding='utf-8').read(), '# 考 bot', ['## 题']),
+    '判据第二部分':   (open('templates/self-test-key.md',encoding='utf-8').read(), '# 第二部分', ['# 第三部分']),
+}
+
+bad = []
+for name,(text,anchor,stop) in targets.items():
+    seg = section(text, anchor, stop)
+    if not seg:
+        bad.append(f'{name}: 找不到该小节（标题被改了？）'); continue
+    missing = [k for k,pat in NEED.items() if not re.search(pat, seg)]
+    if missing: bad.append(f'{name}: 缺 {missing}')
+    if re.search(BAN, seg): bad.append(f'{name}: 出现旧口径（{re.search(BAN,seg).group(0)}）')
+
+if bad:
+    for b in bad: print('  [FAIL]', b)
+    print('  -> 失败')
+    sys.exit(1)
+print(f'  三处小节各含四要素（{list(NEED)}）且无旧口径 -> OK')
+print('  注：这是一致性检查，不做语义判断；改判分标准后仍需人看一遍 diff。')
+sys.exit(0)
 PY6
 [ $? -ne 0 ] && fail=1
 

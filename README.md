@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.5.4`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.6.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -235,9 +235,15 @@ cp templates/self-test-key.md "$BOT/memory/"
 跑机械检查：
 
 ```bash
-./scripts/check.sh     # 5 项：HTML 结构 / QUIZ 题数 / 星号残留 / 版本一致 / 生成物同步
-./scripts/drift.sh      # 外部：当前 Orca 的 CLI 原文是否还对得上
+./scripts/check.sh       # 6 项：HTML 结构 / QUIZ 题数 / 星号 / 版本 / 生成物 / 判分标准一致
+./scripts/drift.sh       # 外部：当前 Orca 的 CLI 原文是否还对得上
+./scripts/test-check.sh  # 检查器自己的变异测试：9 个坏样本必须全部被 check.sh 抓到
 ```
+
+`test-check.sh` 是**检查器的自测**。为什么需要：`check.sh` 是手写逻辑，本身没被检查过；
+它退化成「关键词存在性检查」时会给出**假绿灯**，而假绿灯比没有检查更危险——一旦绿灯，
+就没人会再人工看那几处了。历史上有一次就是这样（v1.5.4 第 6 项）。
+改任何检查逻辑后，先跑它。
 
 `check.sh` 的五项里，**第 5 项会重新生成一遍 `orca-map.html` 逐字比对** —— md 改了忘生成，它会直接失败。
 这是「内容漏抄」这类错唯一可靠的防法。
@@ -275,7 +281,8 @@ orca-bot-kit/
 └── scripts/
     ├── install.ps1            ← 装进某个 bot
     ├── build-html.js          ← 由 md 生成 orca-map.html（零依赖）
-    ├── check.sh               ← 机械检查（仓库自洽 + 生成物同步）
+    ├── check.sh               ← 机械检查（仓库自洽 + 生成物同步 + 判分标准）
+    ├── test-check.sh          ← 检查器的变异测试（9 个坏样本必须被抓到）
     ├── drift.sh               ← Orca 版本漂移监测（外部 CLI 是否变了）
     └── drift-checks.txt       ← 那 21 条关键 CLI 原文清单
 ```
