@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.3.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.4.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -30,6 +30,60 @@
 | 「worker 没有终端」 | 有的承载形态没有**可交互终端窗格**，但不是没有终端资源。判据：`worker-read --source terminal` 被拒。 |
 | 「`--on` 换机器，文件自然读得到」 | `--on` 只决定 worker 落在哪个 server，不保证文件可达。 |
 | 「有 `structworker_…` 字段就说明有终端」 | 那是**常见**不是通则，实测有整条记录没这个字段。 |
+
+---
+
+## 把仓库丢给 bot，让它自己装（推荐用法）
+
+不用自己动手。把仓库地址 + 下面这段提示词发给任何一个 Orca bot，它会自己装好并自测。
+
+**短版**（够用，适合信任执行力强的 bot）：
+
+```
+把 https://github.com/eternaling/orca-bot-kit 装到你自己身上，然后按 docs/QUIZ.md 自测。
+步骤照 README 的「安装」一节；答题前只看题目区、不要看答案区。
+最后告诉我：错了几题、错在哪些、你觉得说明书哪里没讲清。
+```
+
+**完整版**（推荐，避免它偷工或去编内容）：
+
+```
+有一个仓库是给 Orca bot 用的调优包，请把它装到你身上并做一次自测。
+仓库：https://github.com/eternaling/orca-bot-kit
+
+请按顺序做，任一步做不到就如实告诉我，不要猜也不要编：
+
+1) 拿到仓库（任选能用的）：
+   git clone --depth 1 https://github.com/eternaling/orca-bot-kit.git /tmp/orca-bot-kit
+   如果失败，试 gh repo clone eternaling/orca-bot-kit /tmp/orca-bot-kit
+2) 读两个文件：README.md 和 AGENTS.md。看懂它是什么、该放哪里。
+3) 按 README「安装」一节装到你自己身上（装的内容是 docs/ 和 skills/，别自己发明路径）：
+   - docs 四份 → ~/.orca/docs/orca-map/
+   - skills/orca-map 与 skills/dispatch-worker → <你的家目录>/skills/
+   - templates/self-test-key.md → <你的家目录>/memory/
+4) 装完先验证一下真的到位了（ls 这几个路径），把这些输出贴给我。
+5) 自测：只读 docs/QUIZ.md 的「## 题」到「## 答案」之间那一段，
+   不要读答案区。把 23 道题自己答一遍，写下答案。
+6) 答完再去对 templates/self-test-key.md，逐题判对错。
+7) 回复我四件事：①装成功的路径清单 ②23 题错了几题 ③错题号与错因
+   ④你认为说明书哪里写得不够清楚（这条最有价值，请认真给）
+
+注意：第 5 步之前不要打开 templates/ 下任何文件，也不要打开 QUIZ 的答案区。
+自测的目的是发现它教不会你的地方，不是拿满分。
+```
+
+它做完会告诉你「错了几题」。**错得多不是你或它的问题**——那说明说明书哪里没讲清，
+请把它的第 ④ 条反馈带回来（或者直接在仓库开 issue），那比分数有用。
+
+### 为什么这段话值得存在
+
+它把这个仓库的验收标准变成可执行的动作：
+
+- 「装好」= 四个路径真的存在，不是它说装好了
+- 「学会」= 23 题能答对，不是它说看懂了
+- 「说明书合格」= 一个没读过的 bot 能自己走完流程，不是作者觉得写得清楚
+
+发布者自己也用这段做回归：每次改完判据，拿它测一个新 bot，看有没有退回。
 
 ---
 
