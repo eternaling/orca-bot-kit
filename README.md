@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.5.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.5.1`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -42,7 +42,8 @@
 ```
 把 https://github.com/eternaling/orca-bot-kit 装到你自己身上，然后按 docs/QUIZ.md 自测。
 步骤照 README 的「安装」一节；docs 和 skills 必须一起装，只装 skills 会断链。
-答题时只读 QUIZ 的题目（答案已经不存在那个文件里了）；答完再去对 templates/self-test-key.md。
+答题时只读 QUIZ 的题目（答案已经不在那个文件里了）；答完再去对 self-test-key.md
+（仓库里是 templates/self-test-key.md，装完之后是 <你的家目录>/memory/self-test-key.md）。
 最后告诉我：错了几题、错在哪些、你觉得说明书哪里没讲清。
 ```
 
@@ -66,8 +67,10 @@
    - templates/self-test-key.md → <你的家目录>/memory/
 4) 装完先 `ls` 验证真的到位，把输出贴给我。
 5) 自测：只读 docs/QUIZ.md 的 23 题（这个文件里现在只有题目，没有答案），
-   自己把答案写下来。不要去找 `..templates/` 下任何文件。
-6) 答完再去读 templates/self-test-key.md：第一部分是这 23 题的答案，第二部分是判分口径。
+   自己把答案写下来。这一轮**不要读 `templates/self-test-key.md`**（仓库里的路径），
+   也不要读 `<你的家目录>/memory/self-test-key.md`（装完之后的路径）—— 这两个是同一个文件的不同位置。
+6) 答完再去读判据：仓库里是 templates/self-test-key.md，装完之后是 <你的家目录>/memory/self-test-key.md。
+   第一部分是这 23 题的答案，第二部分是判分口径。
    逐题判对错。注意判分标准比“答对没答对”更严：**只给结论不算过，要给出 CLI 原文或能跑的命令。**
 7) 回复我四件事：①装成功的路径清单 ②23 题错了几题（含“结论对但没给验法”的）
    ③错题号与错因 ④你认为说明书哪里写得不够清楚（这条最有价值，请认真给）
@@ -95,6 +98,8 @@
 
 **三样必须一起装。** 技能里全是「去读 md」的引用，只装 `skills/` 不装 `docs/`，技能打开就是一堆断链。装上之后，`skills/orca-map` 与 `skills/dispatch-worker` 才能正常解析它们指向的路径。
 
+**目标目录已有文件时**（比如这个 bot 装过旧版）：覆盖同名文件就行，**不要清空目录**——那里面可能有别人放的东西。
+
 **Windows（PowerShell）**
 
 ```powershell
@@ -120,9 +125,8 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 装完做两件事：
 
-**目标目录已有文件时**（比如这个 bot 装过旧版）：覆盖同名文件就行，**不要清空目录**——那里面可能有别人放的东西。
-
-1. **自测**：`docs/QUIZ.md` 那 23 题（**这个文件里只有题目，没有答案**），答完去对 `templates/self-test-key.md`。
+1. **自测**：`docs/QUIZ.md` 那 23 题（**这个文件里只有题目，没有答案**）。答完去对判据文件，它叫 `self-test-key.md`：
+   在仓库里是 `templates/self-test-key.md`，装完之后是 `<你的家目录>/memory/self-test-key.md`。
 2. **在你 bot 的 `SOUL.md` 里加一句指针**（放在「派活与交付」这类小节）：
    > 结构与口径见 `~/.orca/docs/orca-map/orca-map.md`（唯一事实来源）。派活清单见 `skills/dispatch-worker`。内容不确定时读 md，不要凭记忆。
 
@@ -140,7 +144,8 @@ cp templates/self-test-key.md "$BOT/memory/"
 - 出现「改了 spec 还挂回原 Task」「`--retry-of` 会继承原来的机器」这类答案，直接不及格
 - 23 题全对 = 可以放心让它派活
 
-判据（答案要点）在 `templates/self-test-key.md`。**它故意不放进技能文件**——放进去就成了抄答案，检不出「没读过原文」。
+判据（答案要点）在 `self-test-key.md`（仓库 `templates/` 下，装完后在 `<你的家目录>/memory/`）。
+**它故意不放进技能文件，也不放在题目文件里**——放进去就成了抄答案，检不出「没读过原文」。
 
 ---
 

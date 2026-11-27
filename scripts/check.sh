@@ -31,12 +31,23 @@ k=open('templates/self-test-key.md',encoding='utf-8').read()
 m=re.search(r'地图\s*(\d+)\s*问',q)
 title=int(m.group(1)) if m else -1
 nq=len(re.findall(r'^\d+\.\s',q,re.M))
-# 判据文件第一部分里的答案条数
 part=re.split(r'^# 第二部分', k, flags=re.M)
 na=len(re.findall(r'^\d+\.\s', part[0], re.M)) if len(part)>1 else -1
-leak = '## 答案' in q
+
+# 泄漏检测（两道，不只认字面标题）：
+# ① 题目文件不得出现「答案/判据/参考解答」类小标题
+head_leak = re.findall(r'^#{1,6}\s*.*(?:答案|判据|参考|解答|key|answer)', q, re.M | re.I)
+# ② 把判据文件里每条答案的首句指纹（前 24 字）拿到题目文件里比对
+fingerprints = []
+for line in part[0].split('\n'):
+    s2 = line.strip()
+    if re.match(r'^\d+\.\s', s2):
+        body = re.sub(r'^\d+\.\s*', '', s2).replace('**','')
+        fingerprints.append(body[:24])
+hits = [f for f in fingerprints if len(f) >= 12 and f in q]
+leak = bool(head_leak) or bool(hits)
 ok = title==nq==na and title>0 and not leak
-print(f"  标题={title} 题目={nq} 判据答案={na} 题目文件泄漏答案={'是(不合格)' if leak else '否'} -> {'OK' if ok else '失败'}")
+print(f"  标题={title} 题目={nq} 判据答案={na} 泄漏={'是 -> ' + str((head_leak or hits)[:2]) if leak else '否'} -> {'OK' if ok else '失败'}")
 sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
