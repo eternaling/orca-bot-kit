@@ -11,6 +11,9 @@
 # 用法：./scripts/test-check.sh            跑全部
 #       ./scripts/test-check.sh --list     只列样本
 set -u
+# 修 #7：Windows/GBK 控制台下 python 打印中文会乱码（显示成 ????），
+# 强制 python 用 UTF-8 输出；这比 chcp 65001 干净，不改动用户控制台码页。
+export PYTHONIOENCODING=utf-8
 cd "$(dirname "$0")/.." || exit 1
 SRC=$(pwd)
 

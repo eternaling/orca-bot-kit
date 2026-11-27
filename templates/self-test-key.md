@@ -107,6 +107,9 @@
 只写结论、四类都没有的，**不算过**；反之只要占一样就不因「没抄引导语」扣分。
 
 （本节之外不再另述判分标准；看到 `grading:begin/end` 标记请勿手改——改 `standards/grading.md` 后跑 `scripts/apply-grading.py`。）
+
+**留痕要求**：答题人应把答案写到 `<你的家目录>/memory/self-test-answers-YYYYMMDD.md`。
+拿不出这份文件 → 视为未自测（否则无法排除「先看判据再倒着答」）。
 <!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->
 
 

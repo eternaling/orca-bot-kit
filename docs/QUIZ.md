@@ -6,6 +6,10 @@
 **答案不在这个文件。** 判据文件叫 `self-test-key.md`，位置见文末（仓库里与装完之后不一样）。
 它是给**判分的人**看的。要自测：先只读本文件的题目、把 23 题答完，再去对判据。
 
+**答案要留痕**：写到 `<你的家目录>/memory/self-test-answers-YYYYMMDD.md`，再去对判据。
+理由：判分是自判自，没有留痕就无法事后验证「真的先答后看」——而这套包最在意的恰是这一点。
+**无留痕视为未自测。**
+
 判分的标准比「答对没答对」更严（与 README、判据同一份，由 `standards/grading.md` 生成）：
 
 <!-- grading:begin · 本块由 standards/grading.md 生成，勿手改；要改先改数据源再跑 scripts/apply-grading.py -->
@@ -19,6 +23,9 @@
 只写结论、四类都没有的，**不算过**；反之只要占一样就不因「没抄引导语」扣分。
 
 （本节之外不再另述判分标准；看到 `grading:begin/end` 标记请勿手改——改 `standards/grading.md` 后跑 `scripts/apply-grading.py`。）
+
+**留痕要求**：答题人应把答案写到 `<你的家目录>/memory/self-test-answers-YYYYMMDD.md`。
+拿不出这份文件 → 视为未自测（否则无法排除「先看判据再倒着答」）。
 <!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->
 
 题目都挑的是 bot 历史上真答错过的坑，不是常识题。

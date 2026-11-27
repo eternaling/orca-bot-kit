@@ -44,7 +44,7 @@ Run → Task → Dispatch → Worker
 | --- | --- |
 | **Run** | 命名空间 + 收件箱。自己不调度、不挑机器。不绑 Run 时 `worker-start` 会自己建一个。 |
 | **Task** | 要做的事。状态：`pending / ready / dispatched / completed / failed / blocked`。 |
-| **Dispatch** | 一次派发的记录（`ctx_…`）。同一个 Task 可以重试多次、有好几个 dispatch。 |
+| **Dispatch** | 一次派发的记录（`ctx_…`）。同一个 Task 可以重试多次、有好几个 dispatch。它的 `state` 是 `ready` / `succeeded` / `failed` / `stopped`（四值，**与 Task 六态不是一套**，见参数取值与自测第 17 题） |
 | **Worker** | 受监督的执行实例，由某个 Agent 启动。 |
 
 **Worker ≠ Agent。** Worker 是执行实例，Agent 是启动它的执行程序：`pi / claude / codex / cursor / antigravity / muse / zcode / opencode / opencode2`。所谓「worker 分好几种」，其实是 Agent 类型不同，加上承载形态不同。
@@ -173,7 +173,7 @@ worker 停下等人类回答时是 **healthy，不是失败**。该回答就回�
 2. **Task 六个状态**：`pending / ready / dispatched / completed / failed / blocked`（原文在 `orca orchestration task-update` 的 notes：`Valid --status values: pending, ready, dispatched, completed, failed, blocked.`——`--help` 里只写占位符，所以别拿 help 当依据）
 3. **不能写「worker 没有终端」**：CLI 说 `Not every worker has a terminal` = 没有**可交互终端窗格**；判据是 `worker-read --source terminal` 被拒（`archive_unavailable: … has no terminal output`）。结构化承载**常见**带 `structworker_…` 标识，但不是通则，别拿字段存在当证据
 4. **worker 的「种类」不是 Agent 清单**：`--agent` 是 `such as`（开放列举，非穷尽）
-5. **`--on` 只选 worker 所在的 Orca server**，不保证文件可达
+5. **`--on` 只选 worker 所在的 Orca server**，不保证文件可达（完整取值与原文见「参数取值」表，此处不重复）
 6. **判断 worker 是否真读了文件**：硬证据是 transcript 原话，不是「引不出细节」
 7. **Item 状态不是流水线**
 8. **bot 之间靠 `handoff` / `question` / `status` 交接**，不按项目划死边界。但这三种只是 `send --type` 的一部分——共有**九种**，完整清单见下面「命令面」
@@ -197,7 +197,7 @@ worker 停下等人类回答时是 **healthy，不是失败**。该回答就回�
 | --- | --- |
 | `--environment <selector>` | **这条命令连哪个 Orca**：`local`，或已配对 server 的 id / name。原文 `--environment local pins it here.`；`Without --on a start never picks a server: it runs on the Orca this command reaches.` |
 | `--on <saved-environment>` | **只选 worker 落在哪个 server**：`--on selects only the worker server; the Run and this command remain on the current Orca server.` → 与 `--environment` 是**两个维度**，可以同时给；它不保证文件可达（口径 5） |
-| `--worktree` | `current` / `selector` / `new-child` / `new-top-level`；selector 形如 `name:<x>` / `path:<x>` / `id:<repo-id>::<path>` / `folder:<id>` / `branch:<x>` / `issue:<n>` / `identity:<…>` / `active`（= `current`） |
+| `--worktree` | **问「几种取值」答四种**（`current` / `selector` / `new-child` / `new-top-level`；`selector` 是一**类**不是一种）；selector 形如 `name:<x>` / `path:<x>` / `id:<repo-id>::<path>` / `folder:<id>` / `branch:<x>` / `issue:<n>` / `identity:<…>` / `active`（= `current`） |
 | `--agent` / `--terminal` | **二选一**（用法行 `(--agent <agent> \| --terminal <handle>)`）。`--agent` 是 `such as` 开放列举（口径 4）；`--terminal` 复用已发出的终端 handle，此时**不给 `--worktree`**（原文 `When reusing --terminal, omit --worktree to start in that terminal's own workspace`）。读产出不受承载形态影响，一律 `worker-read --source auto` |
 | `--model` + `--effort` | `--model provider/id`；`--effort` 必须配 `--model`，取 `off / minimal / low / medium / high / xhigh / max`（pi 映射到它的 thinking level）；`--model`、`--effort` 都不能与 `--terminal` 同用 |
 | `--item <n>` | 与 `--on` 互斥（硬限制 2）；派到别的机器就事后再挂：`orca bot item link <n> dispatch:<id>`（`item comment` 只写字，不算挂账） |

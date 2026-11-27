@@ -2,6 +2,9 @@
 # 机械检查：两份 HTML 的结构 + QUIZ 数量自洽 + Markdown 星号残留
 # 用法：在仓库根目录跑 ./scripts/check.sh   退出码 0 = 全过
 set -u
+# 修 #7：Windows/GBK 控制台下 python 打印中文会乱码（显示成 ????），
+# 强制 python 用 UTF-8 输出；这比 chcp 65001 干净，不改动用户控制台码页。
+export PYTHONIOENCODING=utf-8
 cd "$(dirname "$0")/.." || exit 1
 fail=0
 

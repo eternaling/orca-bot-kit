@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.9.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.10.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -60,16 +60,16 @@
    若失败，试 gh repo clone eternaling/orca-bot-kit "$T/kit"
 2) 读两个文件：README.md 和 AGENTS.md。看懂它是什么、该放哪里。
 3) **先备份**（覆盖同名文件是破坏性操作）：把你现有的 skills/ 与 docs/orca-map/ 各复制一份到临时目录，
-   装坏了要能退回去。
+   装坏了要能退回去。**不存在的就记作「无」，不要创建空目录。**
 4) 按 README「安装」一节装到你自己身上。**docs/ 和 skills/ 必须一起装**——
    只装 skills 不装 docs，技能里那些“去读 md”的引用会全部断链：
-   - docs 四份（md / 两个 html / QUIZ.md）→ ~/.orca/docs/orca-map/
+   - docs 五份（md / 两个 html / QUIZ.md / README.md）→ ~/.orca/docs/orca-map/
      目标目录已有其他文件时：**合并、不要删原有文件**
    - skills/orca-map 与 skills/dispatch-worker → <你的家目录>/skills/
    - templates/self-test-key.md → <你的家目录>/memory/
 5) 装完先 `ls` 验证真的到位，把输出贴给我。
 6) 自测：只读 docs/QUIZ.md 的 23 题（这个文件里现在只有题目，没有答案），
-   自己把答案写下来。这一轮**不要读 `templates/self-test-key.md`**（仓库里的路径），
+   把答案写到 `<你的家目录>/memory/self-test-answers-YYYYMMDD.md` 留痕（无留痕视为未自测）。这一轮**不要读 `templates/self-test-key.md`**（仓库里的路径），
    也不要读 `<你的家目录>/memory/self-test-key.md`（装完之后的路径）—— 这两个是同一个文件的不同位置。
 7) 答完再去读判据：仓库里是 templates/self-test-key.md，装完之后是 <你的家目录>/memory/self-test-key.md。
    第一部分是这 23 题的答案，第二部分是判分口径。
@@ -114,7 +114,7 @@
 ```bash
 # 1) 事实源与浏览图 → 本机定版目录
 mkdir -p ~/.orca/docs/orca-map
-cp docs/orca-map.md docs/orca-panorama.html docs/orca-workflow.html docs/QUIZ.md ~/.orca/docs/orca-map/
+cp docs/orca-map.md docs/orca-panorama.html docs/orca-workflow.html docs/QUIZ.md docs/README.md ~/.orca/docs/orca-map/
 
 # 2) 技能 → 你的 bot 家目录（skills/<name>/SKILL.md）
 BOT=~/.orca/bots/<你的 bot 目录>
@@ -128,7 +128,8 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 装完做两件事：
 
-1. **自测**：`docs/QUIZ.md` 那 23 题（**这个文件里只有题目，没有答案**）。答完去对判据文件，它叫 `self-test-key.md`：
+1. **自测**：`docs/QUIZ.md` 那 23 题（**这个文件里只有题目，没有答案**）。
+   答案写到 `memory/self-test-answers-YYYYMMDD.md` 留痕（**无留痕视为未自测**），答完再去对判据文件 `self-test-key.md`：
    在仓库里是 `templates/self-test-key.md`，装完之后是 `<你的家目录>/memory/self-test-key.md`。
 2. **在你 bot 的 `SOUL.md` 里加一句指针**（放在「派活与交付」这类小节）：
    > 结构与口径见 `~/.orca/docs/orca-map/orca-map.md`（唯一事实来源）。派活清单见 `skills/dispatch-worker`。内容不确定时读 md，不要凭记忆。
@@ -155,6 +156,9 @@ cp templates/self-test-key.md "$BOT/memory/"
 只写结论、四类都没有的，**不算过**；反之只要占一样就不因「没抄引导语」扣分。
 
 （本节之外不再另述判分标准；看到 `grading:begin/end` 标记请勿手改——改 `standards/grading.md` 后跑 `scripts/apply-grading.py`。）
+
+**留痕要求**：答题人应把答案写到 `<你的家目录>/memory/self-test-answers-YYYYMMDD.md`。
+拿不出这份文件 → 视为未自测（否则无法排除「先看判据再倒着答」）。
 <!-- grading:end · 以上由 scripts/apply-grading.py 写入 -->
 - 出现「改了 spec 还挂回原 Task」「`--retry-of` 会继承原来的机器」这类答案，直接不及格
 - 23 题全对 = 可以放心让它派活
@@ -283,7 +287,7 @@ orca-bot-kit/
 │   ├── orca-map.html          ← 由 md 自动生成（勿手改）
 │   ├── orca-panorama.html     ← 全景图
 │   ├── orca-workflow.html     ← 流转图
-│   ├── QUIZ.md                ← 23 题 + 答案
+│   ├── QUIZ.md                ← 23 题（只有题目；判据在 templates/）
 │   ├── README.md              ← 这个目录的文件清单与定版信息
 │   └── reviews/               ← 历史评审记录（为什么是现在这个说法）
 ├── skills/

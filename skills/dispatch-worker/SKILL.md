@@ -21,7 +21,7 @@ description: >-
 | 1 | **值不值得派**：能当场验证的小事自己做 | 第 2 步 |
 | 2 | **东西在哪台机器**：本机是默认，可写 `--environment local` 钉住；另一台机器用 `--on <saved-environment>`（已保存的配对 server，不是 ssh 地址）。⚠️ 两个**不同维度**，可以同时给；取值与原文见 md「参数取值」 | 第 3 步 |
 | 3 | **材料可达**：要读的文件在目标机的哪个绝对路径；长文档一律内联原文 | 第 3 步 |
-| 4 | **agent 与模型**：`--agent`（`such as`，开放）；`--model provider/id`；`--effort off…max` | 第 4 步 |
+| 4 | **agent 与模型**：`--agent`（`such as`，开放）；`--model provider/id`；`--effort off/minimal/low/medium/high/xhigh/max`（七个值；省略号写法不能当枚举依据） | 第 4 步 |
 | 5 | **场地**：`--worktree` 四值；一个工作区只放一个写手 | 第 4 步 |
 
 **`--on` 的两个硬限制**：① 它只换 worker 所在的 server，**不保证读得到另一台机器的目录**；② **远程不能用 `current`**，远程可用 **exact remote selector / `new-child` / `new-top-level`** 三选（后两者需远程的 `--repo`）。原文与参数取值集合全在 md「参数取值」+「另外三条硬限制」，本文件不存副本。
