@@ -1,6 +1,6 @@
 # orca-bot-kit
 
-**当前版本 `1.4.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
+**当前版本 `1.5.0`** · 事实基准 **Orca 1.4.278** · [CHANGELOG](CHANGELOG.md) · [ROADMAP](ROADMAP.md)
 
 **给 Orca bot 用的调优包。** 任何 Orca bot 读到这个仓库，就知道活该怎么派、worker 该怎么看、哪些说法是错的。
 
@@ -41,7 +41,8 @@
 
 ```
 把 https://github.com/eternaling/orca-bot-kit 装到你自己身上，然后按 docs/QUIZ.md 自测。
-步骤照 README 的「安装」一节；答题前只看题目区、不要看答案区。
+步骤照 README 的「安装」一节；docs 和 skills 必须一起装，只装 skills 会断链。
+答题时只读 QUIZ 的题目（答案已经不存在那个文件里了）；答完再去对 templates/self-test-key.md。
 最后告诉我：错了几题、错在哪些、你觉得说明书哪里没讲清。
 ```
 
@@ -51,25 +52,28 @@
 有一个仓库是给 Orca bot 用的调优包，请把它装到你身上并做一次自测。
 仓库：https://github.com/eternaling/orca-bot-kit
 
-请按顺序做，任一步做不到就如实告诉我，不要猜也不要编：
+请按顺序做。任一步做不到就如实告诉我，**不要猜也不要编**。
 
-1) 拿到仓库（任选能用的）：
-   git clone --depth 1 https://github.com/eternaling/orca-bot-kit.git /tmp/orca-bot-kit
-   如果失败，试 gh repo clone eternaling/orca-bot-kit /tmp/orca-bot-kit
+1) 拿到仓库（任选能用的）。注意 Windows 上没有 /tmp，先建临时目录：
+   T=$(mktemp -d) && git clone --depth 1 https://github.com/eternaling/orca-bot-kit.git "$T/kit"
+   若失败，试 gh repo clone eternaling/orca-bot-kit "$T/kit"
 2) 读两个文件：README.md 和 AGENTS.md。看懂它是什么、该放哪里。
-3) 按 README「安装」一节装到你自己身上（装的内容是 docs/ 和 skills/，别自己发明路径）：
-   - docs 四份 → ~/.orca/docs/orca-map/
+3) 按 README「安装」一节装到你自己身上。**docs/ 和 skills/ 必须一起装**——
+   只装 skills 不装 docs，技能里那些“去读 md”的引用会全部断链：
+   - docs 四份（md / 两个 html / QUIZ.md）→ ~/.orca/docs/orca-map/
+     目标目录已有其他文件时：**合并、不要删原有文件**
    - skills/orca-map 与 skills/dispatch-worker → <你的家目录>/skills/
    - templates/self-test-key.md → <你的家目录>/memory/
-4) 装完先验证一下真的到位了（ls 这几个路径），把这些输出贴给我。
-5) 自测：只读 docs/QUIZ.md 的「## 题」到「## 答案」之间那一段，
-   不要读答案区。把 23 道题自己答一遍，写下答案。
-6) 答完再去对 templates/self-test-key.md，逐题判对错。
-7) 回复我四件事：①装成功的路径清单 ②23 题错了几题 ③错题号与错因
-   ④你认为说明书哪里写得不够清楚（这条最有价值，请认真给）
+4) 装完先 `ls` 验证真的到位，把输出贴给我。
+5) 自测：只读 docs/QUIZ.md 的 23 题（这个文件里现在只有题目，没有答案），
+   自己把答案写下来。不要去找 `..templates/` 下任何文件。
+6) 答完再去读 templates/self-test-key.md：第一部分是这 23 题的答案，第二部分是判分口径。
+   逐题判对错。注意判分标准比“答对没答对”更严：**只给结论不算过，要给出 CLI 原文或能跑的命令。**
+7) 回复我四件事：①装成功的路径清单 ②23 题错了几题（含“结论对但没给验法”的）
+   ③错题号与错因 ④你认为说明书哪里写得不够清楚（这条最有价值，请认真给）
 
-注意：第 5 步之前不要打开 templates/ 下任何文件，也不要打开 QUIZ 的答案区。
-自测的目的是发现它教不会你的地方，不是拿满分。
+关于 SOUL.md：如果 README 要求往你的 SOUL.md 加指针，**先征求你 owner 的同意**；
+不要自行修改。没改也要在回复里说明。
 ```
 
 它做完会告诉你「错了几题」。**错得多不是你或它的问题**——那说明说明书哪里没讲清，
@@ -89,7 +93,7 @@
 
 ## 安装
 
-把内容和技能装进本机 Orca 的标准位置。装上之后，`skills/orca-map` 与 `skills/dispatch-worker` 才能正常解析它们指向的路径。
+**三样必须一起装。** 技能里全是「去读 md」的引用，只装 `skills/` 不装 `docs/`，技能打开就是一堆断链。装上之后，`skills/orca-map` 与 `skills/dispatch-worker` 才能正常解析它们指向的路径。
 
 **Windows（PowerShell）**
 
@@ -116,9 +120,14 @@ cp templates/self-test-key.md "$BOT/memory/"
 
 装完做两件事：
 
-1. 在你 bot 的 `SOUL.md` 里加一句指针（「派活与交付」这类小节）：
+**目标目录已有文件时**（比如这个 bot 装过旧版）：覆盖同名文件就行，**不要清空目录**——那里面可能有别人放的东西。
+
+1. **自测**：`docs/QUIZ.md` 那 23 题（**这个文件里只有题目，没有答案**），答完去对 `templates/self-test-key.md`。
+2. **在你 bot 的 `SOUL.md` 里加一句指针**（放在「派活与交付」这类小节）：
    > 结构与口径见 `~/.orca/docs/orca-map/orca-map.md`（唯一事实来源）。派活清单见 `skills/dispatch-worker`。内容不确定时读 md，不要凭记忆。
-2. 跑一遍自测：`docs/QUIZ.md` 23 题，答案在后半段。
+
+   ⚠️ **SOUL.md 属于 bot 的 owner，bot 自己不该擅改。** 你是 bot 就先把这句拿给主人看、征得同意；
+   你是人就自己加。没加也不影响其他三样能用，只是技能里找不到指向 SOUL 的入口，长期易漂。
 
 ---
 

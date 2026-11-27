@@ -23,18 +23,20 @@ PY
   [ $? -ne 0 ] && fail=1
 done
 
-echo "== 2/5 QUIZ 数量自洽 =="
+echo "== 2/5 QUIZ 与判据数量自洽 =="
 python - <<'PY'
 import re,sys
-s=open('docs/QUIZ.md',encoding='utf-8').read()
-m=re.search(r'地图\s*(\d+)\s*问',s)
+q=open('docs/QUIZ.md',encoding='utf-8').read()
+k=open('templates/self-test-key.md',encoding='utf-8').read()
+m=re.search(r'地图\s*(\d+)\s*问',q)
 title=int(m.group(1)) if m else -1
-q=re.search(r'^##\s*题(.*?)^##\s*答案',s,re.S|re.M)
-a=re.search(r'^##\s*答案(.*)$',s,re.S|re.M)
-nq=len(re.findall(r'^\d+\.\s',q.group(1),re.M)) if q else -1
-na=len(re.findall(r'^\d+\.\s',a.group(1),re.M)) if a else -1
-ok = title==nq==na and title>0
-print(f"  标题={title} 题区={nq} 答案={na} -> {'OK' if ok else '失败'}")
+nq=len(re.findall(r'^\d+\.\s',q,re.M))
+# 判据文件第一部分里的答案条数
+part=re.split(r'^# 第二部分', k, flags=re.M)
+na=len(re.findall(r'^\d+\.\s', part[0], re.M)) if len(part)>1 else -1
+leak = '## 答案' in q
+ok = title==nq==na and title>0 and not leak
+print(f"  标题={title} 题目={nq} 判据答案={na} 题目文件泄漏答案={'是(不合格)' if leak else '否'} -> {'OK' if ok else '失败'}")
 sys.exit(0 if ok else 1)
 PY
 [ $? -ne 0 ] && fail=1
